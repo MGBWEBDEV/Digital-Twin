@@ -1,7 +1,7 @@
 # Atomic handoff — WP01 + WP02 (physical system and conceptual model)
 
 - Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
-- Status: Ready for review (agent-completed 2026-11-25; not approved)
+- Status: Approved by researcher 2026-11-25 (WP01, WP02, D33). Placeholder values (D34) still proposed
 - Scope completed: WP01 and WP02 in one session as allowed by D28. WP03 not started.
 - Created or modified paths:
   - `design/physical_system.md` (new, WP01): evidence labels; components C1–C13; system boundary; physical states and who can observe them; controller signals vs researcher observations vs simulation-only quantities; StepExample command interface and behaviour; pin/channel table; speed/direction values; actuator, sensor and safety constraints; gaps between StepExample and approved decisions; unknowns register U01–U31; visual rig checklist; D05 clarification.

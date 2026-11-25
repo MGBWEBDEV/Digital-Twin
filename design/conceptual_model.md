@@ -1,6 +1,6 @@
 # Conceptual model (WP02)
 
-> **Status: Ready for review (agent-completed 2026-11-25, Claude Code; not approved).** Built on `design/physical_system.md` (WP01, same session per D28). Describes entities, water transfer, information exchange and boundaries independently of any implementation: no equations (WP05), classes (WP07) or controller behaviour (WP06). Component IDs (C1–C13) and unknowns (U01–U31) refer to WP01.
+> **Status: Approved by researcher 2026-11-25 (agent-completed by Claude Code).** Built on `design/physical_system.md` (WP01, same session per D28). Describes entities, water transfer, information exchange and boundaries independently of any implementation: no equations (WP05), classes (WP07) or controller behaviour (WP06). Component IDs (C1–C13) and unknowns (U01–U31) refer to WP01.
 
 ## 1. Labels
 

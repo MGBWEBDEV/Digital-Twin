@@ -7,8 +7,8 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP | Status | Owner | Notes |
 |---|---|---|---|
 | WP00 | Approved | Claude Code (review fixes) | Scaffold reviewed and fixed 2026-11-25 (see `context/handoffs/WP00_review.md`); decisions D18–D32 recorded. Approved by researcher 2026-11-25 |
-| WP01 | Ready for review | Claude Code | `design/physical_system.md` (2026-11-25). Components, boundary, states, I/O, constraints, unknowns U01–U31 and a rig checklist; details from StepExample marked "derived from code". Proposes D33 (D05 wording). Placeholder values P01–P19 added in section 12 (D34). Handoff: `context/handoffs/WP01_WP02_physical-conceptual.md` |
-| WP02 | Ready for review | Claude Code | `design/conceptual_model.md` with three Mermaid diagrams (2026-11-25); boundaries B1–B4, control/feedback paths, delay points, abstractions. Same handoff as WP01 |
+| WP01 | Approved | Claude Code | `design/physical_system.md` (2026-11-25). Components, boundary, states, I/O, constraints, unknowns U01–U31 and a rig checklist; details from StepExample marked "derived from code". D33 (D05 wording) approved. Placeholder values P01–P19 added in section 12 (D34). Handoff: `context/handoffs/WP01_WP02_physical-conceptual.md`. Approved by researcher 2026-11-25; "derived from code" items and placeholders still to be replaced after the rig check/WP04 |
+| WP02 | Approved | Claude Code | `design/conceptual_model.md` with three Mermaid diagrams (2026-11-25); boundaries B1–B4, control/feedback paths, delay points, abstractions. Same handoff as WP01. Approved by researcher 2026-11-25 |
 | WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); reduced to FR01, FR03, FR09, FR08 (D26); FR09 criteria and alignment with WP01–02 still to complete |
 | WP04 | Pending | — | Needs WP09a and sensor wiring (D19); protocol and pump-only measurements may start earlier with approval |
 | WP05 | Pending | — | WP02; provisional before WP04, final after |
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-Researcher review of WP01/WP02 (`design/physical_system.md`, `design/conceptual_model.md`), the rig checklist (physical_system.md section 10) and proposed D33. Then WP03 (paper track). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
+WP03 (paper track). Researcher: rig checklist (`design/physical_system.md` section 10) and review of placeholder values P01–P19 (D34). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
 
 ## Change log
 
@@ -72,3 +72,4 @@ Researcher review of WP01/WP02 (`design/physical_system.md`, `design/conceptual_
 
 - 2026-11-25: WP01 and WP02 executed together (D28) by Claude Code; `design/physical_system.md` and `design/conceptual_model.md` ready for review; D33 proposed (D05 wording). No hardware inspected, no measurements.
 - 2026-11-25: placeholder values P01–P19 added to `design/physical_system.md` section 12 at the researcher's request (D34); not for physical runs or results.
+- 2026-11-25: researcher approved WP01, WP02 and D33.

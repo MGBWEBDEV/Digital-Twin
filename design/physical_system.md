@@ -1,6 +1,6 @@
 # Physical system definition (WP01)
 
-> **Status: Ready for review (agent-completed 2026-11-25, Claude Code; not approved).** Describes the real rig from confirmed researcher statements (D02, D03, D18–D20, D32) and from the bundled StepExample code, which D32 makes the rig firmware baseline. No measurements were taken and no hardware was inspected by the agent. Every detail read from code is labelled "derived from code" and must be checked on the rig (checklist in section 10). Placeholder values for design and simulation work are in section 12 (D34); they are not facts. No equations beyond the shared conservation principle; no downstream design.
+> **Status: Approved by researcher 2026-11-25 (agent-completed by Claude Code).** Approval covers the document's structure and content; items marked "derived from code", TBD or placeholder (section 12) remain unverified until the rig check and WP04. Describes the real rig from confirmed researcher statements (D02, D03, D18–D20, D32) and from the bundled StepExample code, which D32 makes the rig firmware baseline. No measurements were taken and no hardware was inspected by the agent. Every detail read from code is labelled "derived from code" and must be checked on the rig (checklist in section 10). Placeholder values for design and simulation work are in section 12 (D34); they are not facts. No equations beyond the shared conservation principle; no downstream design.
 
 ## 1. Evidence labels
 
