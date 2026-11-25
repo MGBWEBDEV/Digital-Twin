@@ -1,0 +1,35 @@
+# Atomic handoff — WP05 (provisional)
+
+- Agent / model version if known: Claude Code, Claude Opus 5.5 (`claude-opus-5-5`), 2026-11-25.
+- Status: Approved by researcher 2026-11-25 (provisional; final version after WP04). `design/software_architecture.md` section 8 revision still awaiting review.
+- Scope completed: Model 1 and Model 2 specified with units, parameters (placeholder IDs only), states, inputs, per-step update rules, sensor rule, initialization, boundaries (overflow with spill, empty tank with shortfall and dead volume, cut-off, end of run) and mass balance; argument that the models are not mathematically equivalent (counterexample per effect, list of variations that are equivalent, nesting); D24 table of included / candidate / excluded effects; identifiability notes for WP04; hand-calculated check cases M1-1…M1-12 and M2-1…M2-11. Software architecture section 8 updated to match. No code written.
+- Created or modified paths:
+  - `design/mathematical_models.md` (new)
+  - `design/software_architecture.md`: status line; section 7 `truth.csv` columns (adds `spill_ml`, `shortfall_ml`, Model 2 `tube_fill_ml`); section 8 rewritten (class diagram with `PrimingRunOnPump`, `DelayedSensor`, spill/shortfall/dead volume; mapping table referencing WP05 sections; initialization; step size); section 13 WP05 open point
+  - `context/decisions.md`: D39 added (approved 2026-11-25); cross-reference notes on D13 and D24
+  - `context/project_status.md`: WP05 row, next task, change log (the pre-existing uncommitted WP07-figures line was kept)
+- Checks performed and actual results:
+  - Every hand-calculated case recomputed by hand twice from the rules in sections 4–5 (no code run, per instructions). Model 1 cases agree with `design/functional_requirements.md` section 9 (S1, S2, S4, S5 48 mL, never-OFF fault).
+  - Mass balance verified by hand for M1-4, M1-5 and the M2-6 walkthrough (24.70 + 2.00 = 5 + 0 + 21.70).
+  - Grep confirmed no remaining references to the old section 8 wording ("provisional until WP05", `intake_cmd`).
+  - Mermaid diagrams not rendered.
+- Decisions (proposed vs approved), decision IDs: D39 APPROVED 2026-11-25 (form of the two models). D13 and D24 unchanged apart from cross-reference notes.
+- Assumptions / changes from previous artifacts:
+  - Overflow now explicitly holds V at C and counts spill (WP07 said only "not silently clamped").
+  - Intake tube retains water while OFF (U27); start tube fill f0 is a new run initial condition; researcher confirmed water stays in the tube and the reset will empty it (f0 = 0).
+  - Run-on is delivered at Q_in after each effective OFF edge, including a cut-off; only its total volume is observable.
+  - Sensor trigger offset δ_trig has no placeholder and is treated as 0; it may be zero by construction (WP05 section 5.4).
+  - Outtake ideal in both models.
+  - Intake-before-outtake order inside a step (convention).
+  - WP03 section 9 says run-on after a cut-off would exceed the safe mark in Model 2; WP05 shows this holds for a primed tube (50.5 mL) but not an empty one (48.5 mL). WP03 not edited (approved document); flag for WP08.
+- Blockers / outstanding questions:
+  - All values are placeholders; inclusion of every Model 2 effect waits for WP04.
+  - Answered 2026-11-25: water stays in the intake tube after OFF; the planned reset empties it, so f0 = 0. Reset method and duration: WP08.
+  - Will the controller be given the measured sensor switch volume (WP08)? Determines whether E3 exists.
+- Downstream dependencies (paths and relevant sections):
+  - WP04: `design/mathematical_models.md` sections 7–8 (what to measure, identifiability).
+  - WP08: section 10 (f0, E3, cut-off margin, FR01-P1 calibration form).
+  - WP10: sections 2–4, checks 9.1–9.2; `design/software_architecture.md` section 8.
+  - WP11: sections 5–7, checks 9.3–9.4 (recompute with final values).
+- Prompt/log reference or commit identifier if available: researcher prompt "Execute WP05 (provisional) only…" (2026-11-25); WP05 committed after researcher approval; `design/software_architecture.md` changes left uncommitted pending review.
+- Next suggested atomic task (do not execute): researcher review of the revised architecture section 8; then WP10 Model 1 in a fresh session (or WP09a / WP12 per `context/project_status.md`).
