@@ -37,7 +37,7 @@ Example reviewer assignment:
 
 ## Recommended first sequence
 
-WP01 → WP02 → WP03 → WP06. WP04 needs access to hardware; a provisional WP05/WP07 may be prepared explicitly without inventing measurements. The authoritative dependencies and completion criteria are in the roadmap. Physical tests must be researcher-approved and safely bounded.
+Paper track: WP01 → WP02 → WP03 → WP06 → WP07. Rig track: supply the rig firmware and wire the sensor, then WP09a → WP04. Software track: provisional WP05 → WP10, and WP12 test-first. See the track overview (D28) in the roadmap, which holds the authoritative dependencies and completion criteria. Physical tests must be researcher-approved and safely bounded.
 
 ## Reference material
 
