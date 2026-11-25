@@ -10,6 +10,7 @@ Applies to Codex, Claude Code and any other agent. This file is canonical; CLAUD
 ## Research constraints
 - Keep scope small: one ESP32 tank, two models, two selected error types. Do not invent measurements, hardware parameters, results, or citations. Distinguish confirmed, proposed, assumed, measured and validated.
 - All modelling and implementation may be AI-generated; researcher reviews specifications, assumptions, test oracles and safety. Record significant prompts, model/version if known, and generated artifacts or commit identifiers. Never infer missing model identifiers.
+- Do not generate controllers under test (reference or experimental) inside this repository: they come from clean-room sessions without repository access (D29). Do not place test scenarios, oracles or fault catalogues into controller prompts.
 - Separate controller logic, physical simulation, and independent test evaluation. Same controller source and interface in all environments; do not expose hidden simulated volume to the controller. Preserve equivalence of timing and initial conditions.
 - Separate mathematical verification, independent physical validation, and controller functional tests. Do not treat agreement with a model's own equations as empirical validation. Do not assert that higher fidelity improves detection without evidence. No unsafe runs on hardware; physical experiments require researcher approval and safeguards.
 - Use clear academic English and minimal dependencies. Do not claim standalone simulations are connected digital twins.

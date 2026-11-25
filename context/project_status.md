@@ -6,7 +6,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25; topic 2 (scope) resolved as D26; topic 3 (ground truth, repetitions) resolved as D27; topic 4 (roadmap tracks) resolved as D28 |
+| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25; topic 2 (scope) resolved as D26; topic 3 (ground truth, repetitions) resolved as D27; topic 4 (roadmap tracks) resolved as D28; topic 5 (controller generation) resolved as D29 |
 | WP01 | Pending | — | Can start now from confirmed facts (D18, D19, D21) and references; may be done together with WP02; inspect rig firmware when supplied |
 | WP02 | Pending | — | WP01 (same session allowed) |
 | WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); reduced to FR01, FR03, FR09, FR08 (D26); FR09 criteria and alignment with WP01–02 still to complete |
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP00 review, part 2, remaining topics: fault selection and generation isolation (next), interface and fault space, draft vs master context, as listed in `context/handoffs/WP00_review.md`. Then WP01 — physical system definition.
+WP00 review, part 2, remaining topic: draft vs master context (next), as listed in `context/handoffs/WP00_review.md`. Then WP01 — physical system definition.
 
 ## Change log
 
@@ -57,3 +57,5 @@ WP00 review, part 2, remaining topics: fault selection and generation isolation 
 - WP00 review part 2, topic 3, 2026-11-25 (Claude Code with researcher). Ground truth via independent firmware cut-off mirrored in simulation, and reduced repetition rule (D27); roadmap WP04, WP08, WP09, WP10, WP15 updated.
 
 - WP00 review part 2, topic 4, 2026-11-25 (Claude Code with researcher). Roadmap re-sequenced into paper, rig and software tracks (D28); WP09 split into WP09a (rig I/O firmware, early) and WP09b (reference controller) to remove the WP04 → WP08 → WP09 → WP04 deadlock.
+
+- WP00 review part 2, topic 5, 2026-11-25 (Claude Code with researcher). Clean-room controller generation by a different AI family and step-function controller interface (D29); AGENTS.md rule added.
