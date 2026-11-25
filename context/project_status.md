@@ -6,7 +6,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25; topic 2 (scope) resolved as D26; topic 3 (ground truth, repetitions) resolved as D27; topic 4 (roadmap tracks) resolved as D28; topic 5 (controller generation) resolved as D29; topic 6 (draft reconciliation) resolved as D30/D31. Review complete; awaiting researcher approval (D20, D31 still proposed) |
+| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25; topic 2 (scope) resolved as D26; topic 3 (ground truth, repetitions) resolved as D27; topic 4 (roadmap tracks) resolved as D28; topic 5 (controller generation) resolved as D29; topic 6 (draft reconciliation) resolved as D30/D31. Review complete; D20 and D31 approved 2026-11-25; awaiting researcher approval of WP00 |
 | WP01 | Pending | — | Can start now from confirmed facts (D18, D19, D21) and references; may be done together with WP02; pins, board and speed defaults from bundled StepExample (D32) to be checked on the rig |
 | WP02 | Pending | — | WP01 (same session allowed) |
 | WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); reduced to FR01, FR03, FR09, FR08 (D26); FR09 criteria and alignment with WP01–02 still to complete |
@@ -31,13 +31,13 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 - Complete extracted research draft/PoC text bundled at `references/research_draft.txt`; original raw attachment was not exportable. Review against current project context before approving the baseline.
 - Pins, board and speed defaults are taken from the bundled StepExample code (D32) and still need a visual check on the rig (WP01).
 - Level sensor installed but not wired (D19): sensor-dependent rig tests blocked; design and simulation can proceed.
-- Fixed pump speed/direction (D20) proposed; values used so far are probably the StepExample host-script defaults (full speed, direction True; D32).
+- Fixed pump speed/direction approved (D20); values used so far are probably the StepExample host-script defaults (full speed, direction True; D32).
 - Hardware verification, physical measurements, tolerances and fidelity distinction pending.
 - Claude Code verified working in the repository (2026-11-25); Codex not verified.
 
 ## Next task
 
-WP01 — physical system definition, optionally together with WP02 (D28). Before or alongside: researcher approves WP00 and the proposed D20/D31 and wires the sensor (see `context/handoffs/WP00_review.md`).
+WP01 — physical system definition, optionally together with WP02 (D28). Before or alongside: researcher approves WP00 and wires the sensor (see `context/handoffs/WP00_review.md`).
 
 ## Change log
 
@@ -63,3 +63,5 @@ WP01 — physical system definition, optionally together with WP02 (D28). Before
 - WP00 review part 2, topic 6, 2026-11-25 (Claude Code with researcher). No original controller program exists (D30); title kept with "models of a digital twin" framing proposed (D31); draft reconciliation table added to `references/README.md`. WP00 review complete.
 
 - 2026-11-25: researcher confirmed the rig firmware is StepExample with only a pump identifier changed (D32); "add rig firmware" removed from blockers and roadmap gates.
+
+- 2026-11-25: researcher approved D20 (fixed pump speed and direction) and D31 (keep title; models of a digital twin).

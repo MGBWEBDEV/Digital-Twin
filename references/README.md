@@ -16,7 +16,7 @@ Where `research_draft.txt` differs from the approved project decisions, the deci
 | Model 1 fixed amounts per step vs Model 2 flow rate × time | Mathematically equivalent for constant rates; the fidelity difference is the set of measurable rig effects | D24 |
 | Model 2 keeps "the water level always between X and X" | A controller requirement, not physics: FR08 and the safe-limit mark | D26, D24 |
 | "If they behave differently, increase the complexity of the digital twin" | Done once, by plan: effects are included only if measurable in WP04 | D24 |
-| "Digital twin" in the title and objectives | Models of a digital twin, not a connected twin (proposed) | D31 |
+| "Digital twin" in the title and objectives | Models of a digital twin, not a connected twin | D31 |
 | Literature references | Not yet verified against originals; verify before citing (WP17) | — |
 
 ## LabAutomationKits

@@ -15,7 +15,7 @@
   - `git check-ignore`: reference `.vscode/` files no longer ignored; other `.vscode/` folders still ignored.
   - `scripts/fetch_labkit.sh` run into a scratch location: fetched pinned commit `a22a6b98…`; `diff -r` against `references/LabAutomationKits` reported no differences; commit file identical; script refuses to overwrite the bundled copy (exit 1).
   - SHA-256 of `references/research_draft.txt` matches the value in `references/README.md`.
-- Decisions (proposed vs approved), decision IDs: CONFIRMED D18, D19, D22; APPROVED D21, D23; PROPOSED D20.
+- Decisions (proposed vs approved), decision IDs: CONFIRMED D18, D19, D22; APPROVED D21, D23; PROPOSED D20 (approved later, 2026-11-25).
 - Assumptions / changes from previous artifacts: Board model (Adafruit Metro ESP32-S2) taken from StepExample only, recorded as unconfirmed. Pump speed values unknown.
 - Blockers / outstanding questions: modified rig firmware not in repository; sensor not wired; pump speed/direction values unknown.
 - Downstream dependencies: WP01 should use D18–D21 and inspect the rig firmware when supplied.
@@ -31,7 +31,7 @@
 - **Topic 4, roadmap — resolved 2026-11-25.** D28: three parallel tracks; WP09 split into WP09a (rig I/O firmware, early) and WP09b (reference controller) to remove the WP04/WP08/WP09 deadlock; provisional WP08 before WP04; WP10 with TBD placeholders; WP12 test-first; WP14 independent of WP13; WP01+WP02 in one session allowed. Updated roadmap (table, tracks section, WP09a/WP09b, WP10, WP12 details), status table, README sequence. Covers finding 8.
 - **Topic 5, controller generation and interface — resolved 2026-11-25.** D29: clean-room generation without repository access from a fixed prompt; different AI family from the one building models/evaluator (choice fixed in WP08); step-function controller (time, normalized sensor) → (intake, outtake); adapter normalizes sensor; harness injects sensor faults. Updated decisions, master context, roadmap (WP07, WP08, WP09b, WP14), AGENTS.md. Covers findings 5 and 6.
 - **Topic 6, draft vs current plan — resolved 2026-11-25.** D30 (confirmed: no original controller program; reference is the clean-room AI controller), D31 (proposed: keep title, report as models of a digital twin). Reconciliation table added to `references/README.md`. Covers finding 7.
-- **Part 2 complete.** Items deliberately left for later work packages: FR01 weak physical oracle, FR09 exact criteria and the response limit relative to serial latency (WP03); power-on/reset state and requests while busy (WP06); D05 wording (WP01); literature verification (WP17). Researcher actions: wire the sensor (D19), approve or adjust D20 and D31, then approve WP00. (Rig firmware need not be supplied: D32.)
+- **Part 2 complete.** Items deliberately left for later work packages: FR01 weak physical oracle, FR09 exact criteria and the response limit relative to serial latency (WP03); power-on/reset state and requests while busy (WP06); D05 wording (WP01); literature verification (WP17). Researcher actions: wire the sensor (D19), then approve WP00. (D20 and D31 approved 2026-11-25.) (Rig firmware need not be supplied: D32.)
 - **Next suggested task (do not execute):** WP01 — physical system definition, optionally together with WP02 (D28).
 
 ## Open review findings for part 2 (research design)
