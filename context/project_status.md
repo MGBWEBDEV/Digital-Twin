@@ -19,7 +19,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP09b | Pending | — | WP03, WP06–08, WP09a; researcher safety review |
 | WP10 | Ready for review (provisional) | Claude Code | `src/model_1/` (WaterTank, Pump, WaterLevelSensor, TankSystem, placeholder parameters by ID) and shared simulation pieces in `src/shared/` (Environment interface, SimulationClock, CutOff, DelayLine, SimulationEnvironment with command/report delay slots at zero) (2026-11-25). Standard library only; 46 unittest tests pass (M1-1…M1-12, mass balance, cut-off, conventions). M1-8…M1-12 checked with fixed command schedules, not a controller; closed-loop check waits for harness (WP12) and WP09b. No logger/run-file writer, harness or rig adapter. D40 approved by researcher 2026-11-25 (intake tube always empty at run start; exact fractions). Handoff: `context/handoffs/WP10_model-1.md`. Final version after WP04 values |
 | WP11 | Pending | — | WP05 final (needs WP04), WP10 |
-| WP12 | Pending | — | WP03, WP08 (provisional); test-first with stub plant; final verification with WP10–11 |
+| WP12 | In progress (test-first part approved) | Claude Code | Evaluator in `src/testing/` (2026-11-25): reads run files, scores every WP03 check by ID (pass/fail/undetermined/not applicable), infers the WP06 end state, marks invalid runs, writes `verdict.json`; scenarios S1–S5 as ten run cases; placeholder parameters by ID. Standard library only; 58 unittest tests pass (WP03 section 9 oracles on a stub plant with fixed command schedules, hand-written boundary/fault/rig/invalid logs, import independence, parameter values against design docs). No controller, no Model 1/2, no harness or run-file writer. D41 approved by researcher 2026-11-25 (rig FR08-P2 uses the settled end reading when the outtake never ran; S4 also checks FR03-L1). Handoff: `context/handoffs/WP12_evaluator-test-first.md`. Remaining: harness/run-file writer, verification with WP10–11 |
 | WP13 | Pending | — | WP04, WP08, WP09b, WP10–12; physical access |
 | WP14 | Pending | — | WP03, WP06, WP08, WP09b, WP12 |
 | WP15 | Pending | — | WP08, WP12–14 |
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-In a fresh session: WP10 (Model 1, provisional placeholders), WP09a (rig firmware; needs researcher approval before upload) or WP12 test-first evaluator. Researcher: rig checklist (`design/physical_system.md` section 10); wire the sensor (D19); mark the safe limit (U26).
+In a fresh session: WP12 remainder (harness and run-file writer in `src/shared/`, closed-loop verification with Model 1), WP09a (rig firmware; needs researcher approval before upload) or WP08 (provisional). Researcher: rig checklist (`design/physical_system.md` section 10); wire the sensor (D19); mark the safe limit (U26).
 
 ## Change log
 
@@ -84,4 +84,6 @@ In a fresh session: WP10 (Model 1, provisional placeholders), WP09a (rig firmwar
 - 2026-11-25: researcher approved provisional WP05 and D39; stated that runs start with an empty intake tube (reset empties it). Architecture section 8 revision still awaiting review.
 - 2026-11-25: researcher approved the revised section 8 of `design/software_architecture.md` (WP05 follow-up).
 - 2026-11-25: WP10 (provisional) completed by Claude Code (ready for review): Model 1 and shared simulation environment pieces; 46 tests pass; D40 proposed. No controller written.
+- 2026-11-25: WP12 test-first part completed by Claude Code (ready for review): evaluator, scenario definitions and 55 tests in `src/testing/`; D41 proposed. No controller or model written.
 - 2026-11-25: researcher approved D40 (tube-fill input removed: intake tube always empty at run start; exact fractions kept); architecture section 8 and WP05 f0 row aligned.
+- 2026-11-25: researcher approved the WP12 test-first part and D41 (rig FR08-P2 from the settled end reading when only the intake ran; S4 also checks FR03-L1); WP03 FR08-P2 and S4 row amended accordingly.

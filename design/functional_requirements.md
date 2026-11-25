@@ -102,7 +102,7 @@ The earlier draft also required the controller to "report that the precondition 
 - **FR08-L3:** after the intake's ON interval ends, both pumps stay OFF until T_end (no restart, even if the sensor input changes).
 - **FR08-L4:** the cut-off does not fire. A cut-off is an FR08 failure, never a pass (D27).
 - **FR08-P1:** V_end ≤ safe mark (P04).
-- **FR08-P2 (models only):** V_peak ≤ safe mark and no computed overflow above capacity C. On the rig this check is undetermined unless the peak can be read as a settled level (D24); overflow is never caused physically.
+- **FR08-P2 (models only):** V_peak ≤ safe mark and no computed overflow above capacity C. On the rig this check is undetermined unless the peak can be read as a settled level (D24); overflow is never caused physically. Amended by D41 (researcher approval 2026-11-25): when the outtake was never ON the level cannot fall, so the settled V_end reading is used as the peak.
 
 ## 6. Verdicts
 
@@ -132,7 +132,7 @@ For each run, retain the prompt and controller version, environment (rig, Model 
 | S1 | V0 = 5 mL (P10) | FR01, T_fill = 10 s and 20 s (two runs) | FR01, FR08 |
 | S2 | V0 = 5 mL | FR03 | FR03 case A, FR08 |
 | S3 | V0 = 30 mL (sensor wet) | FR03; FR09 with V_target = 40 mL (two runs) | FR03 case B, FR09 case B, FR08 |
-| S4 | V0 = 5 mL; the harness holds the sensor input dry for the whole run, in all environments (D29); the plant is unaffected | FR03 | FR08 (L2 in particular) |
+| S4 | V0 = 5 mL; the harness holds the sensor input dry for the whole run, in all environments (D29); the plant is unaffected | FR03 | FR08 (L2 in particular); FR03-L1 (added by D41) |
 | S5 | V0 = 5 mL | FR09, V_target = 30, 40, 45, 48 mL (four runs) | FR09 case A, FR08; record margin to the safe mark |
 
 Ten runs per controller per environment. S4 on the rig is safe with the placeholders (stops at about 35 mL, section 9) but, like every rig run, needs researcher approval.

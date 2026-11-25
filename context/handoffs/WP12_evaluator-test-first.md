@@ -1,0 +1,32 @@
+# Atomic handoff — WP12 (testing framework, test-first part: evaluator)
+
+- Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
+- Status: Approved by researcher 2026-11-25 (partial WP12: test-first part only)
+- Scope completed: independent evaluator that reads a run directory and writes a verdict per WP03 check ID, with the WP06 end-state inference; scenario definitions S1–S5; unittest tests using hand-written logs and a stub TankSystem. Not done (out of the assigned scope): harness/runner and run-file writer, controller rule check and determinism replay, verification with Model 1 (WP10) and Model 2 (WP11). No controller generated or written; Model 1/2 not touched.
+- Created or modified paths:
+  - `src/testing/__init__.py`, `evaluator.py` (checks, validity, end state, `verdict.json`, CLI), `runfiles.py` (readers), `parameters.py` (R01–R06, R08, R09, P04–P06 placeholders by ID), `scenarios/__init__.py` (ten run cases), `README.md` (usage and run-file contract)
+  - `src/testing/tests/`: `support.py` (run-file writer, hand-written log builder, `StubTankSystem`, minimal D38-order loop with D38 cut-off), `test_oracles_stub_plant.py`, `test_handwritten_logs.py`, `test_independence.py`
+  - `context/decisions.md`: D41 added; approved 2026-11-25 and reworded in plain language
+  - `design/functional_requirements.md`: FR08-P2 and S4 row amended per D41
+  - `context/project_status.md`: WP12 row, next task, change log
+  - this file
+- Checks performed and actual results:
+  - `python3 -m unittest discover -s src -t src` (Python 3.13.18): 104 tests OK, of which 58 are WP12 (the other 46 are the concurrent WP10 session's, unchanged).
+  - All WP03 section 9 rows reproduced through the evaluator on stub-plant runs: S1 10/20 s (V_end 15/25), S2 OFF at 19.0 and 19.1 s (pass) and 19.2 s (FR03-L2 fail), S3 both runs (DONE_SKIPPED, V_end 30), S4 (OFF at 30 s, V_end 35, DONE_TIMEOUT), S5 30/40/45/48 mL (OFF 25/35/40/43 s), never-OFF S2 fault (cut-off at 45 s, V_end 50, FR03-L2 and FR08-L4 fail, FR08-P1 passes at the limit).
+  - Tolerance boundaries tested on both sides: R02, R03 (FR01-L2, FR09-L2), R04 (FR03-L2, FR08-L2), R05 (FR01-P1); wet input exactly at T_deadline counts as wet.
+  - Mutation check (one change at a time in a scratch copy): widened response limit, `<` instead of `≤` at deadline and tolerance, wrong cut-off event name, case selection ignored, overflow clause removed. All caught; the last only after adding `test_overflow_flag_alone_fails_fr08_p2`.
+  - Evaluator modules import only the standard library and `testing` (AST test). Parameter values equal the tables in `design/functional_requirements.md` section 4 and `design/physical_system.md` section 12 (parsed by test).
+  - Not checked: run files from the real WP10 simulation environment (no run-file writer exists yet); rig run files.
+- Decisions (proposed vs approved), decision IDs: D41 APPROVED 2026-11-25 (not-applicable result, overall verdict rule, case selection by first input, S4 scores FR08 plus FR03-L1, invalid-run rules, `run.json` keys, evaluator-owned parameter copy, rig FR08-P2 from the settled end reading when the outtake never ran). Uses D07, D24–D27, D29, D34–D38.
+- Assumptions / changes from previous artifacts:
+  - Command schedules in tests are fixed, hand-derived ON intervals (e.g. ON 0–19.0 s for S2), not sensor-driven logic, so no controller exists in the repository (D29). The stub plant is a test double (constant rate, fixed sensor level, no capacity/spill/outtake), kept in `src/testing/tests/`, not Model 1.
+  - `run.json` key names were not fixed in WP07 section 7; the evaluator defines them (README). The future harness must write them.
+  - FR03-L2 passes if the intake was already OFF at t_w (a premature stop shows in FR03-P1). FR08-L3 passes vacuously when the intake is never switched OFF (other checks fail then). FR09-L1 cannot evaluate "still ON at t_w" when the input is never wet; it is judged on the remaining parts and the evidence says so.
+  - Labels outside WP06 for logs matching no WP06 path: NO_START, NOT_STOPPED, UNEXPECTED_STOP.
+  - Every verdict is marked `provisional` while parameters are placeholders (D34); placeholder values are not turned into "undetermined".
+- Blockers / outstanding questions:
+  - Resolved by D41: rig FR08-P2 (settled end reading used as the peak when the outtake never ran) and S4 also scores FR03-L1.
+  - A concurrent WP10 session edited `context/decisions.md` (D40) and `context/project_status.md` during this task; my edits were targeted and kept theirs. The uncommitted WP07 figure changes were left untouched.
+- Downstream dependencies: harness and run-file writer in `src/shared/` must produce the files in `src/testing/README.md`; WP10/WP11 verification runs (closed loop needs the WP09b controller); WP08 fixes final R/P values (`src/testing/parameters.py`, `scenarios/`), the rig FR08-P2 rule and manual-reading entry; WP13/WP15 use `verdict.json`.
+- Prompt/log reference or commit identifier if available: Claude Code session of 2026-11-25; researcher prompt "Execute WP12 (test-first part) only …"; approval "lets follow your recommendations". Stub `reset(v0_ml)` aligned with revised D40.
+- Next suggested atomic task (do not execute): WP12 remainder (harness, run-file writer, controller rule check, verification on Model 1 run files).
