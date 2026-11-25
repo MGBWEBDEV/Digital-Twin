@@ -1,0 +1,24 @@
+# Atomic handoff — WP06 (controller behaviour)
+
+- Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
+- Status: Approved by researcher 2026-11-25 (WP06 and D36)
+- Scope completed: `design/controller_behavior.md`, the normative behaviour of a correct controller for FR01, FR03, FR09, FR08. WP07 not started.
+- Created or modified paths:
+  - `design/controller_behavior.md` (new): interface recap; constraints K1–K7; states and timers; Mermaid state diagram and per-call flowchart; transition table with guard priority and WP03 check IDs; expected vs accepted timing; exceptions X1–X11; observable events and evaluator inference of the end state; expected paths for S1–S5; fault-space mapping (D29 fault types → first failing check); open points.
+  - `context/decisions.md`: D36 added (PROPOSED).
+  - `context/project_status.md`: WP06 row, next task, change log.
+  - this file.
+- Checks performed and actual results:
+  - Every transition is mapped to at least one WP03 check and every WP03 logical check (FR01-L1/L2, FR03-L1/L2/L3, FR09-L1/L2/L3, FR08-L1–L4) appears in the transition table, constraints or event table (checked by reading both files side by side).
+  - Scenario times in section 7 agree with `design/functional_requirements.md` section 9 (same placeholder arithmetic; T_extra bound (50 − 24)/1 = 26 s).
+  - Mermaid diagrams not rendered (no tooling installed).
+- Decisions (proposed vs approved), decision IDs: D36 APPROVED 2026-11-25. Uses D07, D26, D27, D29, D34, D35.
+- Assumptions / changes from previous artifacts:
+  - Guard priority: a wet input at the deadline call counts as wet (sensor guard before deadline guard), consistent with FR08-L2 wording.
+  - Sensor latching (K7) made explicit: only the first wet input counts.
+  - FR01 with sensor already wet: fill as requested (request assumed valid).
+  - Document declared evaluator-side: not given to the controller-generation session (D29); prompt content decided in WP08.
+- Blockers / outstanding questions: Event ordering (19.0 vs 19.1 s stop in S2) left to WP07.
+- Downstream dependencies: WP07 (sections 1, 2, 5 X7–X10, 9), WP08 (prompt content, R02–R06), WP09b (judged against this spec), WP12 (section 6 inference rules), WP14 (section 8).
+- Prompt/log reference or commit identifier if available: Claude Code session of 2026-11-25; researcher prompt "start WP06".
+- Next suggested atomic task (do not execute): researcher review of WP06 and D36; then WP07.

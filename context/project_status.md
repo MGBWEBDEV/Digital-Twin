@@ -12,7 +12,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP03 | Approved | Claude Code | `design/functional_requirements.md` completed 2026-11-25: FR01, FR03, FR09, FR08 with numbered logical/physical checks, placeholder parameters R01–R11 (D34 rule), scenarios S1–S5, infeasibility list, hand-calculated Model 1 oracles. D35 approved. Handoff: `context/handoffs/WP03_functional-requirements.md`. Approved by researcher 2026-11-25; numbers remain placeholders (D34) |
 | WP04 | Pending | — | Needs WP09a and sensor wiring (D19); protocol and pump-only measurements may start earlier with approval |
 | WP05 | Pending | — | WP02; provisional before WP04, final after |
-| WP06 | Pending | — | WP03 |
+| WP06 | Approved | Claude Code | `design/controller_behavior.md` (2026-11-25): constraints K1–K7, states, Mermaid state machine and per-call order, transition table mapped to WP03 checks, exceptions X1–X11, evaluator inference, scenario paths, fault-space mapping. D36 approved. Handoff: `context/handoffs/WP06_controller-behavior.md`. Approved by researcher 2026-11-25 |
 | WP07 | Pending | — | WP02–03, WP06; WP05 provisional suffices |
 | WP08 | Pending | — | WP03, WP05–07; provisional before WP04, final after |
 | WP09a | Pending | — | WP01, WP07; starts from bundled StepExample (D32); researcher approval before upload |
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP06 — controller behaviour (paper track; leads to WP07, which unblocks WP09a and WP10). Provisional WP05 may run in parallel (software track). Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
+WP07 — software architecture (unblocks WP09a and WP10); provisional WP05 may run in parallel. Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
 
 ## Change log
 
@@ -76,3 +76,5 @@ WP06 — controller behaviour (paper track; leads to WP07, which unblocks WP09a 
 - 2026-11-25: researcher approved placeholder values P01–P19 as they are (D34); they remain placeholders, not facts.
 - 2026-11-25: WP03 completed by Claude Code (ready for review); D35 proposed.
 - 2026-11-25: researcher approved WP03 and D35.
+- 2026-11-25: WP06 completed by Claude Code (ready for review); D36 proposed.
+- 2026-11-25: researcher approved WP06 and D36.
