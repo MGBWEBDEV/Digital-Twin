@@ -1,0 +1,27 @@
+# Atomic handoff — WP03 (functional requirements)
+
+- Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
+- Status: Approved by researcher 2026-11-25 (WP03 and D35)
+- Scope completed: `design/functional_requirements.md` completed from the D23/D26 draft and aligned with WP01/WP02. WP05/WP06 not started.
+- Created or modified paths:
+  - `design/functional_requirements.md` (rewritten): roles of FR01/FR03/FR09/FR08; observation basis (B2/B4); common definitions (run, t_w, ON interval, single interval rule); placeholder parameters R01–R11; numbered checks FR01-L1…FR08-P2; verdict and logging rules; infeasibility list; scenarios S1–S5 (10 runs per controller per environment); hand-calculated Model 1 oracles; failure mapping; deferred FR02, FR04–FR07 kept.
+  - `context/decisions.md`: D35 added (PROPOSED).
+  - `context/project_status.md`: WP03 row, next task, change log.
+  - this file.
+- Checks performed and actual results:
+  - Section 9 numbers recomputed with a short independent Python calculation (t_w = 19 s; S4 end 35 mL; cut-off end 50 mL; FR09 T_extra 6/16/21/24 s and OFF at 25/35/40/43 s); all matched. Run count recomputed (10) and corrected from 9 in the text.
+  - Roadmap WP03 criteria: tasks small and identifiable (4); initial conditions, completion (T_end, D35) and measurable checks given per FR; provisional values flagged as placeholders (D34); infeasible requirements listed (section 7); mathematical checks planned independently (section 9).
+- Decisions (proposed vs approved), decision IDs: D35 APPROVED 2026-11-25. Uses D07, D24–D27, D29, D33, D34.
+- Assumptions / changes from previous artifacts:
+  - FR01 physical oracle changed from "measurable amount" to calibration-predicted volume within ε_V (WP00 open item).
+  - FR09 "report that the precondition failed" removed (not expressible under D29).
+  - Response limit measured at the controller interface, not against the physical sensor edge (WP00 open item on serial latency).
+  - Single intake ON interval required in all fill tasks.
+  - Missing-transition scenario on the rig now uses the harness sensor override (D29) instead of disconnecting the sensor.
+  - Placeholder parameters R01–R11 chosen by the agent under D34.
+- Blockers / outstanding questions:
+  - Finding: the placeholder cut-off P11 (45 s) is sized to the safe mark, so a never-stopping controller ends exactly at the mark in Model 1 and above it in Model 2 with run-on. WP08 should size it with margin (D27 says below capacity).
+  - Invalid-request handling not covered (possible reserve).
+- Downstream dependencies: WP06 (sections 2, 3, 5), WP07 (D35 points 2–4, R01), WP08 (sections 4, 8, cut-off finding), WP12 (check IDs, section 6, section 9 oracles), WP14 (prompt known parameters R07).
+- Prompt/log reference or commit identifier if available: Claude Code session of 2026-11-25; researcher prompt "approve the placeholder values as they are, lets move to the requirements".
+- Next suggested atomic task (do not execute): researcher review of WP03 and D35; then WP06 (controller behaviour) or provisional WP05.

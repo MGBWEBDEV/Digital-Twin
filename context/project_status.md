@@ -9,7 +9,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP00 | Approved | Claude Code (review fixes) | Scaffold reviewed and fixed 2026-11-25 (see `context/handoffs/WP00_review.md`); decisions D18–D32 recorded. Approved by researcher 2026-11-25 |
 | WP01 | Approved | Claude Code | `design/physical_system.md` (2026-11-25). Components, boundary, states, I/O, constraints, unknowns U01–U31 and a rig checklist; details from StepExample marked "derived from code". D33 (D05 wording) approved. Placeholder values P01–P19 added in section 12 (D34). Handoff: `context/handoffs/WP01_WP02_physical-conceptual.md`. Approved by researcher 2026-11-25; "derived from code" items and placeholders still to be replaced after the rig check/WP04 |
 | WP02 | Approved | Claude Code | `design/conceptual_model.md` with three Mermaid diagrams (2026-11-25); boundaries B1–B4, control/feedback paths, delay points, abstractions. Same handoff as WP01. Approved by researcher 2026-11-25 |
-| WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); reduced to FR01, FR03, FR09, FR08 (D26); FR09 criteria and alignment with WP01–02 still to complete |
+| WP03 | Approved | Claude Code | `design/functional_requirements.md` completed 2026-11-25: FR01, FR03, FR09, FR08 with numbered logical/physical checks, placeholder parameters R01–R11 (D34 rule), scenarios S1–S5, infeasibility list, hand-calculated Model 1 oracles. D35 approved. Handoff: `context/handoffs/WP03_functional-requirements.md`. Approved by researcher 2026-11-25; numbers remain placeholders (D34) |
 | WP04 | Pending | — | Needs WP09a and sensor wiring (D19); protocol and pump-only measurements may start earlier with approval |
 | WP05 | Pending | — | WP02; provisional before WP04, final after |
 | WP06 | Pending | — | WP03 |
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP03 (paper track). Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
+WP06 — controller behaviour (paper track; leads to WP07, which unblocks WP09a and WP10). Provisional WP05 may run in parallel (software track). Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
 
 ## Change log
 
@@ -74,3 +74,5 @@ WP03 (paper track). Researcher: rig checklist (`design/physical_system.md` secti
 - 2026-11-25: placeholder values P01–P19 added to `design/physical_system.md` section 12 at the researcher's request (D34); not for physical runs or results.
 - 2026-11-25: researcher approved WP01, WP02 and D33.
 - 2026-11-25: researcher approved placeholder values P01–P19 as they are (D34); they remain placeholders, not facts.
+- 2026-11-25: WP03 completed by Claude Code (ready for review); D35 proposed.
+- 2026-11-25: researcher approved WP03 and D35.
