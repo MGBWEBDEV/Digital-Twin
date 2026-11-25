@@ -41,6 +41,7 @@ Record the following before scoring dependent checks. All unconfirmed values are
 |---|---|
 | Tank and sensing | Capacity, safe-limit mark, syringe graduation and reading uncertainty, activation range |
 | Task inputs | Starting volumes, pump durations, FR09 target volumes and their margins to the safe mark, observation period after completion |
+| Safety net (D27) | Firmware maximum ON time per pump, derived from intake calibration and syringe capacity; identical in both simulation adapters. A cut-off is scored as an FR08 failure |
 | Timing and measurement | Safety timeout, maximum response delay (on the rig including host–ESP32 serial latency), timing and volume tolerances, settling time before visual readings |
 | Simulation | Model versions, intake calibration, included and excluded Model 2 effects (D24), assumptions |
 

@@ -6,7 +6,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25; topic 2 (scope) resolved as D26 |
+| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25; topic 2 (scope) resolved as D26; topic 3 (ground truth, repetitions) resolved as D27 |
 | WP01 | Pending | — | Can start from confirmed facts (D18, D19, D21) and references; modified rig firmware not yet supplied |
 | WP02 | Pending | — | WP01 |
 | WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); reduced to FR01, FR03, FR09, FR08 (D26); FR09 criteria and alignment with WP01–02 still to complete |
@@ -36,7 +36,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP00 review, part 2, remaining topics: ground truth (next), fault selection and generation isolation, roadmap re-sequencing, as listed in `context/handoffs/WP00_review.md`. Then WP01 — physical system definition.
+WP00 review, part 2, remaining topics: roadmap re-sequencing (next), fault selection and generation isolation, interface and fault space, draft vs master context, as listed in `context/handoffs/WP00_review.md`. Then WP01 — physical system definition.
 
 ## Change log
 
@@ -52,3 +52,5 @@ WP00 review, part 2, remaining topics: ground truth (next), fault selection and 
 - WP00 review part 2, topic 1, 2026-11-25 (Claude Code with researcher). Fidelity axis approved (D24, supersedes D08) and model comparison criterion approved in principle (D25); master context and roadmap WP04/WP05/WP11 updated.
 
 - WP00 review part 2, topic 2, 2026-11-25 (Claude Code with researcher). Requirement set reduced to FR01, FR03, FR09 (new), FR08 (D26); deferred requirements kept in `design/functional_requirements.md`.
+
+- WP00 review part 2, topic 3, 2026-11-25 (Claude Code with researcher). Ground truth via independent firmware cut-off mirrored in simulation, and reduced repetition rule (D27); roadmap WP04, WP08, WP09, WP10, WP15 updated.
