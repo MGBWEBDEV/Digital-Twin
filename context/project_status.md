@@ -65,3 +65,5 @@ WP01 — physical system definition, optionally together with WP02 (D28). Before
 - 2026-11-25: researcher confirmed the rig firmware is StepExample with only a pump identifier changed (D32); "add rig firmware" removed from blockers and roadmap gates.
 
 - 2026-11-25: researcher approved D20 (fixed pump speed and direction) and D31 (keep title; models of a digital twin).
+
+- 2026-11-25: scaffold decisions settled by researcher: D07, D09, D11, D17 approved; D08 marked superseded by D24; D10 left proposed until WP08.
