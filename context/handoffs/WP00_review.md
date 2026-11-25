@@ -26,7 +26,8 @@
 
 - **Topic 1, fidelity axis — resolved 2026-11-25.** D24 (Model 2 = Model 1 plus rig effects that are measurable; inclusion rule; visual settled-reading and safe-mark rules) and D25 (models compared by agreement of their pass/fail verdicts with the rig's, against margin to the limit; APPROVED in principle, details depend on topic 3). Updated `context/decisions.md` (D08 superseded, D13 narrowed), `context/master_context.md` (model and outcome sections), `context/roadmap.md` (WP04, WP05, WP11 details). Covers findings 1 and 4 below; finding 2 is addressed by D25's margin reporting and continues in topic 2.
 - Researcher discussion points carried forward: communication lag is expected to be negligible but is measured once; tube priming may be the largest effect; a sensor-landmark task ("fill to X % using the sensor as reference, then timed") is a strong candidate for topic 2 because it combines sensor and timing near a limit.
-- **Next: topic 2, scope** (reduce FR01–FR08 to three or four; consider the sensor-landmark task). Then topic 3 (ground truth) and topic 4 (roadmap re-sequencing).
+- **Topic 2, scope — resolved 2026-11-25.** D26: selected set FR01 (control), FR03 (sensor), new FR09 (sensor-landmark fill to target, run at several margins), FR08 (safety); FR02, FR04–FR07 deferred (FR07 first reserve); controller only fills. `design/functional_requirements.md` restructured (active table, scenarios, deferred section); D14 narrowed; D24 note on switch-off level; master context and roadmap WP04 aligned. Covers finding 9 and the FR parts of findings 2 and 10 (FR01 weak physical oracle and response limit vs latency remain for WP03; dry-run protection no longer applies while draining is deferred).
+- **Next: topic 3, ground truth** (how rig verdicts are obtained safely for faulty controllers). Then topic 4 (roadmap re-sequencing) and the remaining findings 5–7.
 
 ## Open review findings for part 2 (research design)
 
