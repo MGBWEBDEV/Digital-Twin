@@ -7,8 +7,8 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP | Status | Owner | Notes |
 |---|---|---|---|
 | WP00 | Approved | Claude Code (review fixes) | Scaffold reviewed and fixed 2026-11-25 (see `context/handoffs/WP00_review.md`); decisions D18–D32 recorded. Approved by researcher 2026-11-25 |
-| WP01 | Pending | — | Can start now from confirmed facts (D18, D19, D21) and references; may be done together with WP02; pins, board and speed defaults from bundled StepExample (D32) to be checked on the rig |
-| WP02 | Pending | — | WP01 (same session allowed) |
+| WP01 | Ready for review | Claude Code | `design/physical_system.md` (2026-11-25). Components, boundary, states, I/O, constraints, unknowns U01–U31 and a rig checklist; details from StepExample marked "derived from code". Proposes D33 (D05 wording). Placeholder values P01–P19 added in section 12 (D34). Handoff: `context/handoffs/WP01_WP02_physical-conceptual.md` |
+| WP02 | Ready for review | Claude Code | `design/conceptual_model.md` with three Mermaid diagrams (2026-11-25); boundaries B1–B4, control/feedback paths, delay points, abstractions. Same handoff as WP01 |
 | WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); reduced to FR01, FR03, FR09, FR08 (D26); FR09 criteria and alignment with WP01–02 still to complete |
 | WP04 | Pending | — | Needs WP09a and sensor wiring (D19); protocol and pump-only measurements may start earlier with approval |
 | WP05 | Pending | — | WP02; provisional before WP04, final after |
@@ -29,7 +29,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 ## Current blockers / missing inputs
 
 - Complete extracted research draft/PoC text bundled at `references/research_draft.txt`; original raw attachment was not exportable. Review against current project context before approving the baseline.
-- Pins, board and speed defaults are taken from the bundled StepExample code (D32) and still need a visual check on the rig (WP01).
+- Pins, board, speed defaults and all other "derived from code" details in `design/physical_system.md` need the researcher's visual rig check (checklist in section 10 of that file). Many physical details are TBD (unknowns U01–U31).
 - Level sensor installed but not wired (D19): sensor-dependent rig tests blocked; design and simulation can proceed.
 - Fixed pump speed/direction approved (D20); values used so far are probably the StepExample host-script defaults (full speed, direction True; D32).
 - Hardware verification, physical measurements, tolerances and fidelity distinction pending.
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP01 — physical system definition, optionally together with WP02 (D28). Before or alongside: researcher wires the sensor (needed for WP04, not for WP01) (see `context/handoffs/WP00_review.md`).
+Researcher review of WP01/WP02 (`design/physical_system.md`, `design/conceptual_model.md`), the rig checklist (physical_system.md section 10) and proposed D33. Then WP03 (paper track). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
 
 ## Change log
 
@@ -69,3 +69,6 @@ WP01 — physical system definition, optionally together with WP02 (D28). Before
 - 2026-11-25: scaffold decisions settled by researcher: D07, D09, D11, D17 approved; D08 marked superseded by D24; D10 left proposed until WP08.
 
 - 2026-11-25: WP00 approved by researcher.
+
+- 2026-11-25: WP01 and WP02 executed together (D28) by Claude Code; `design/physical_system.md` and `design/conceptual_model.md` ready for review; D33 proposed (D05 wording). No hardware inspected, no measurements.
+- 2026-11-25: placeholder values P01–P19 added to `design/physical_system.md` section 12 at the researcher's request (D34); not for physical runs or results.

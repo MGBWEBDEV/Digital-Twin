@@ -1,0 +1,34 @@
+# Atomic handoff — WP01 + WP02 (physical system and conceptual model)
+
+- Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
+- Status: Ready for review (agent-completed 2026-11-25; not approved)
+- Scope completed: WP01 and WP02 in one session as allowed by D28. WP03 not started.
+- Created or modified paths:
+  - `design/physical_system.md` (new, WP01): evidence labels; components C1–C13; system boundary; physical states and who can observe them; controller signals vs researcher observations vs simulation-only quantities; StepExample command interface and behaviour; pin/channel table; speed/direction values; actuator, sensor and safety constraints; gaps between StepExample and approved decisions; unknowns register U01–U31; visual rig checklist; D05 clarification.
+  - `design/conceptual_model.md` (new, WP02): entities labelled actual/planned/conceptual; Mermaid diagrams for water/energy/information flows, the control–feedback loop with candidate delay points d1–d6, and the same controller across rig, Model 1 and Model 2; boundaries B1–B4; conceptual states; abstractions and exclusions; actual-vs-conceptual differences; inputs for later WPs.
+  - `context/decisions.md`: D33 added (PROPOSED, clarifies D05); cross-reference note on D05.
+  - `context/project_status.md`: WP01, WP02 rows → Ready for review; blocker line on code-derived details; next task; change log.
+  - this file.
+- Checks performed and actual results:
+  - Every code-derived value re-checked against the bundled source by grep: PWM/DIR pins 8/9, 16/21, 10/13, 11/12 (`df4MotorDriver.h`); 12-bit resolution and identity `map()` (`df4MotorDriver.cpp`); 115200 baud and `,` `;` `/` framing, start-up message, `stopPumps()` + `kStepDone` on expiry, `Busy` and `Stopped` replies (`main.cpp`); `speedA = 4096`, `dirA = True`, `stepTime = 50000` and the `set_state` defaults (`driver.py`); board `adafruit_metro_esp32s2`, platform version unpinned (`platformio.ini`). All matched.
+  - Completion criteria WP01 (components, boundary, states, I/O, constraints, unknowns, unverified details marked): each has its own section. WP02 (entities, flows, control/feedback, boundaries, implementation-independent, diagram): covered; no equations, classes or controller behaviour included.
+  - Mermaid diagrams were **not rendered** (no Mermaid tooling installed); syntax kept to basic flowchart features. Check that they display in your viewer.
+  - No hardware inspected, no runs, no measurements.
+- Addendum (same session, researcher request): placeholder values P01–P19 added as `design/physical_system.md` section 12; D34 recorded (approach approved by researcher, values proposed by agent). P11 = (P04 − P10) / P06 = 45 s checked by hand.
+- Decisions (proposed vs approved), decision IDs: D33 PROPOSED (D05 wording); D34 APPROVED approach, values PROPOSED. Uses D02, D03, D07, D18–D21, D24, D26, D27, D29, D30, D32. No approved decision changed.
+- Assumptions / changes from previous artifacts:
+  - Assumed (flagged in the files): tubing, source and destination containers and a pump power supply exist; leaks, evaporation and siphoning negligible; a stopped peristaltic pump blocks flow; pumps off after `setup()`; driver channels 3–4 unused.
+  - New observations from the code, not previously recorded: `kStepDone` and `kStop` stop **all** pumps; an OFF step is also rejected while a step runs and itself occupies the timer; the state report is a command record, not a measurement; stop leaves the DIR pin unchanged; PWM frequency and Arduino-core version are not set or pinned.
+  - The master context says "ON/OFF control only, with timed operation"; WP01 keeps this and records the driver's PWM/direction capability under D20/D32.
+- Blockers / outstanding questions:
+  - Researcher rig check (`design/physical_system.md` section 10) to resolve "derived from code" items and visual unknowns, especially U20 (which pump is on which driver channel), U01–U05 (syringe), U13–U16 (sensor), U26 (safe-limit mark).
+  - Sensor wiring (D19) still pending.
+  - D33 needs approval or rejection.
+- Downstream dependencies (paths and relevant sections):
+  - WP03: `conceptual_model.md` B2/B4 (what controller and observer can see); `physical_system.md` 6.1–6.2, 7.
+  - WP05: `conceptual_model.md` sections 4, 5.3, 7, 8.
+  - WP06/WP07: `conceptual_model.md` sections 5, 6; `physical_system.md` 6.4 (start-up state, U28).
+  - WP09a: `physical_system.md` sections 6.4–6.6 and 8; `conceptual_model.md` section 9.
+  - WP04: unknowns marked "WP04" in `physical_system.md` section 9.
+- Prompt/log reference or commit identifier if available: Claude Code session of 2026-11-25; researcher prompt "Execute WP01 (and WP02 in the same session, per D28) …". Not committed (not requested).
+- Next suggested atomic task (do not execute): researcher review of WP01/WP02 and the rig checklist; then WP03 (complete and align `design/functional_requirements.md` with WP01–02).
