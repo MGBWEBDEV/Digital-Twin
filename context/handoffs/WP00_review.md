@@ -1,7 +1,7 @@
 # Atomic handoff — WP00 review (part 1)
 
 - Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
-- Status: Ready for review (part 1 applied; part 2 pending)
+- Status: Approved by researcher 2026-11-25 (parts 1 and 2 complete)
 - Scope completed: Review of the ChatGPT-generated scaffold for logical flaws and workflow stoppers; researcher decisions recorded; mechanical and process fixes applied. Research-design items are listed below, not resolved.
 - Created or modified paths:
   - moved `functional_requirements.md` → `design/functional_requirements.md` (status banner, D21 wording, serial latency in timing parameters)
@@ -31,7 +31,7 @@
 - **Topic 4, roadmap — resolved 2026-11-25.** D28: three parallel tracks; WP09 split into WP09a (rig I/O firmware, early) and WP09b (reference controller) to remove the WP04/WP08/WP09 deadlock; provisional WP08 before WP04; WP10 with TBD placeholders; WP12 test-first; WP14 independent of WP13; WP01+WP02 in one session allowed. Updated roadmap (table, tracks section, WP09a/WP09b, WP10, WP12 details), status table, README sequence. Covers finding 8.
 - **Topic 5, controller generation and interface — resolved 2026-11-25.** D29: clean-room generation without repository access from a fixed prompt; different AI family from the one building models/evaluator (choice fixed in WP08); step-function controller (time, normalized sensor) → (intake, outtake); adapter normalizes sensor; harness injects sensor faults. Updated decisions, master context, roadmap (WP07, WP08, WP09b, WP14), AGENTS.md. Covers findings 5 and 6.
 - **Topic 6, draft vs current plan — resolved 2026-11-25.** D30 (confirmed: no original controller program; reference is the clean-room AI controller), D31 (proposed: keep title, report as models of a digital twin). Reconciliation table added to `references/README.md`. Covers finding 7.
-- **Part 2 complete.** Items deliberately left for later work packages: FR01 weak physical oracle, FR09 exact criteria and the response limit relative to serial latency (WP03); power-on/reset state and requests while busy (WP06); D05 wording (WP01); literature verification (WP17). Researcher actions: wire the sensor (D19), then approve WP00. (D20 and D31 approved 2026-11-25; scaffold decisions D07, D09, D11, D17 approved, D08 superseded, D10 open until WP08.) (Rig firmware need not be supplied: D32.)
+- **Part 2 complete.** Items deliberately left for later work packages: FR01 weak physical oracle, FR09 exact criteria and the response limit relative to serial latency (WP03); power-on/reset state and requests while busy (WP06); D05 wording (WP01); literature verification (WP17). Researcher actions: wire the sensor (D19). WP00 approved 2026-11-25. (D20 and D31 approved 2026-11-25; scaffold decisions D07, D09, D11, D17 approved, D08 superseded, D10 open until WP08.) (Rig firmware need not be supplied: D32.)
 - **Next suggested task (do not execute):** WP01 — physical system definition, optionally together with WP02 (D28).
 
 ## Open review findings for part 2 (research design)
