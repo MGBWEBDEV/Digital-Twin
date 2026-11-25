@@ -1,7 +1,7 @@
 # Atomic handoff — WP10 (provisional)
 
 - Agent / model version if known: Claude Code, Claude Opus 5.5 (`claude-opus-5-5`), 2026-11-25.
-- Status: Ready for review (provisional; final version after WP04 values replace the placeholders). Not approved by the researcher.
+- Status: Approved by researcher 2026-11-25 (provisional; final version after WP04 values replace the placeholders). Basis: approved by researcher 2026-11-25 as provisional, on condition that spot checks M1-3, M1-4, M1-11, M1-12 agree; those checks were worked out by hand and run on Model 1 by Claude Code at the researcher's request (all agree), so they are not an independent human recheck of the WP05 oracles.
 - Scope completed: Model 1 ("ideal rig") implemented per `design/mathematical_models.md` section 4 and `design/software_architecture.md` section 8, plus the shared simulation environment pieces it needs (architecture sections 4–6): Environment interface, integer-ms simulation clock, command and report delay slots (zero for Model 1), per-pump cut-off with D38 semantics, end-of-run settling. Standard library only; tests with `unittest`. No controller written or generated; no harness, logger/run-file writer or rig adapter.
 - Created or modified paths:
   - `src/model_1/`: `__init__.py`, `exact.py` (exact fractions), `parameters.py` (placeholder values tagged P01, P05, P06, P07, P09; Model 1 environment parameters with zero delays), `water_tank.py`, `pump.py`, `water_level_sensor.py`, `tank_system.py` (`TankSystem`, `build_model_1`)
@@ -33,5 +33,5 @@
   - WP11: reuse `WaterTank`, subclass `Pump` and `WaterLevelSensor`, set `SimulationParameters(command_delay_ms, report_delay_ms)`; checks M2-1…M2-11 (WP05 sections 9.3–9.4); Model 2 with zero effects must reproduce the WP10 tests.
   - WP12: harness (controller loading, sensor override, call log) and run-file writer on top of `SimulationEnvironment` (`truth_rows`, `events`); closed-loop verification of M1-8…M1-12 with a real controller.
   - WP09a: rig environment implementing `shared.environment.Environment`.
-- Prompt/log reference or commit identifier if available: researcher prompt "Execute WP10 (provisional) only…" (2026-11-25); code, D40 and design-document alignment committed together after D40 approval (WP10 deliverable itself still awaiting researcher approval).
-- Next suggested atomic task (do not execute): researcher approval of WP10 as a whole (D40 already approved); then WP12 (harness and evaluator, already apparently in progress) or WP09a.
+- Prompt/log reference or commit identifier if available: researcher prompt "Execute WP10 (provisional) only…" (2026-11-25); code, D40 and design-document alignment committed together after D40 approval ; WP10 approval committed separately.
+- Next suggested atomic task (do not execute): WP12 remainder (harness, run-file writer, end-to-end check on Model 1) in a fresh session, or WP09a.
