@@ -10,7 +10,7 @@ Investigate the relationship between physical model fidelity, complexity, accura
 ## Physical system definition
 Confirmed by researcher: ESP32 microcontroller; one intake and one outtake peristaltic pump; a discrete threshold water-level sensor; a graduated syringe as tank, allowing visually observed volume in mL. Pumps have ON/OFF control only, with timed operation; no variable speed or direct measured flow input. Sensor does not report continuous volume. Actual volume cannot be read directly by the controller; the researcher can observe syringe graduations. Do not assume exact sensor polarity, wiring or plumbing beyond the stated intake/outtake roles.
 
-Rig status (2026-11-25, D18–D20): both pumps are wired to the driver used by the StepExample base firmware and have run; the modified firmware is not yet in the repository. The driver accepts PWM speed and direction; the study proposes one fixed speed and direction per pump so that control remains ON/OFF. The level sensor is installed but not wired.
+Rig status (2026-11-25, D18–D20): both pumps are wired to the driver used by the StepExample firmware and have run; the rig firmware is the bundled StepExample with only a pump identifier changed (D32). The driver accepts PWM speed and direction; the study proposes one fixed speed and direction per pump so that control remains ON/OFF. The level sensor is installed but not wired.
 
 Primary boundary: monitored syringe tank. Intake adds water and outtake removes water. The host controller issues pump commands and receives threshold feedback through the ESP32 (D21). Reservoirs, tubing and supporting components initially abstracted, subject to physical inspection. Water conservation is the relevant physical mechanism.
 

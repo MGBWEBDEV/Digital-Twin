@@ -37,10 +37,10 @@ Example reviewer assignment:
 
 ## Recommended first sequence
 
-Paper track: WP01 → WP02 → WP03 → WP06 → WP07. Rig track: supply the rig firmware and wire the sensor, then WP09a → WP04. Software track: provisional WP05 → WP10, and WP12 test-first. See the track overview (D28) in the roadmap, which holds the authoritative dependencies and completion criteria. Physical tests must be researcher-approved and safely bounded.
+Paper track: WP01 → WP02 → WP03 → WP06 → WP07. Rig track: wire the sensor, then WP09a → WP04. Software track: provisional WP05 → WP10, and WP12 test-first. See the track overview (D28) in the roadmap, which holds the authoritative dependencies and completion criteria. Physical tests must be researcher-approved and safely bounded.
 
 ## Reference material
 
-The complete StepExample directory and upstream license are included under `references/LabAutomationKits/`. Every file was checked against upstream commit `a22a6b981e1f0cfd5d0311b571e7998846d37a7d`. StepExample is only the base: the firmware actually running on the rig was modified for two pumps and is still to be added (D18).
+The complete StepExample directory and upstream license are included under `references/LabAutomationKits/`. Every file was checked against upstream commit `a22a6b981e1f0cfd5d0311b571e7998846d37a7d`. The rig runs this StepExample with only a pump identifier changed so the second pump works (D32).
 
 The recovered draft and its checksum are listed in [the reference register](references/README.md).

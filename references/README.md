@@ -27,8 +27,8 @@ Upstream source: https://github.com/rmorenoga/LabAutomationKits/tree/a22a6b981e1
 
 `scripts/fetch_labkit.sh` reproduces this snapshot from the pinned commit into an empty location; it refuses to overwrite the bundled copy.
 
-StepExample is a base example, not the rig firmware: it drives only pump A, takes PWM speed and direction per step, and reads no level sensor.
+As bundled, StepExample drives only pump A, takes PWM speed and direction per step, and reads no level sensor.
 
-## Rig firmware (pending)
+## Rig firmware
 
-The firmware currently running on the rig was modified from StepExample to drive the second pump (D18). Add it here (for example `references/rig_firmware/`) together with any modified host script, and record its origin and date. Until then, pins, driver channels and the board model are unconfirmed.
+The rig runs this StepExample with a single change: a pump function's letter identifier (A → B) so the second pump works; nothing else, including speed and direction, was changed (D32). The modified copy is therefore not stored. Pins, board and speed defaults are read from the bundled code and still need a visual check on the rig (WP01).

@@ -5,15 +5,15 @@ Execute one assigned WP (or smaller explicitly scoped subtask) per session. Depe
 | WP | Dependencies | Artifact(s) | Completion criteria |
 |---|---|---|---|
 | WP00 Initialization | None | README, agent instructions, context files, directories | Scaffold created and verified; no research work claimed |
-| WP01 Physical system definition | Existing hardware evidence (rig firmware when supplied) | design/physical_system.md | Components, boundary, states, I/O, constraints and unknowns documented; unverified details marked |
+| WP01 Physical system definition | Existing hardware evidence (bundled StepExample = rig firmware baseline, D32) | design/physical_system.md | Components, boundary, states, I/O, constraints and unknowns documented; unverified details marked |
 | WP02 Conceptual model | WP01 (may be done in the same session) | design/conceptual_model.md + diagram | Hardware entities, physical flows, control/feedback and boundaries clear; implementation-independent |
 | WP03 Functional requirements | WP01–02 | design/functional_requirements.md | Small, feasible, identifiable tasks with initial conditions, completion and measurable criteria; provisional tolerances flagged |
-| WP04 Physical characterization | WP01, WP03, WP09a; hardware access (rig firmware supplied, sensor wired) | experiments/physical_characterization.md, experiments/data/ | Safe approved procedure, repeatable data, uncertainty, calibration vs held-out validation; enough evidence to parameterize intended differences. Protocol and pump-only measurements may start before WP09a with the existing self-expiring timed-step firmware, with researcher approval |
+| WP04 Physical characterization | WP01, WP03, WP09a; hardware access (sensor wired) | experiments/physical_characterization.md, experiments/data/ | Safe approved procedure, repeatable data, uncertainty, calibration vs held-out validation; enough evidence to parameterize intended differences. Protocol and pump-only measurements may start before WP09a with the existing self-expiring timed-step firmware, with researcher approval |
 | WP05 Mathematical models | WP02; WP04 for final version | design/mathematical_models.md | Two specified physical models, units, equations, assumptions, boundaries and justified meaningful difference; provisional version allowed before WP04 |
 | WP06 Controller behavior | WP03 | design/controller_behavior.md + diagram(s) | Expected states/actions/transitions/timing and exceptions specified independently of code |
 | WP07 Software architecture | WP02–03, WP06; WP05 (provisional suffices) | design/software_architecture.md + diagrams | Common interface, physical and simulated adapters, clock, class responsibilities, equation mapping, logger/evaluator boundaries, safety cut-off placement clear |
 | WP08 Experiment protocol | WP03, WP05–07; WP04 for final numbers | experiments/experimental_protocol.md | Independent checks, scenarios, conditions, tolerances, data handling, outcome rules, generation budget and fault-selection procedure defined before experiments; provisional version allowed before WP04 |
-| WP09a Rig I/O firmware and serial adapter | WP01, WP07 (provisional suffices); rig firmware supplied | src/esp32/, src/shared/ (hardware adapter) | Both pumps switch ON/OFF over serial; sensor state reported; host-side logging; independent maximum-ON-time cut-off logged when it fires, starting with a conservative limit and updated after WP04; reviewed for safe execution (researcher approval before upload) |
+| WP09a Rig I/O firmware and serial adapter | WP01, WP07 (provisional suffices) | src/esp32/, src/shared/ (hardware adapter) | Both pumps switch ON/OFF over serial; sensor state reported; host-side logging; independent maximum-ON-time cut-off logged when it fires, starting with a conservative limit and updated after WP04; reviewed for safe execution (researcher approval before upload) |
 | WP09b Reference controller | WP03, WP06–08, WP09a | src/shared/ (controller) | Same controller source runs against the rig adapter and a simulation adapter; reviewed for safe physical execution (researcher approval required); labelled candidate until WP13 |
 | WP10 Model 1 | WP05 (provisional suffices, parameters as TBD placeholders), WP07, WP09a interface; WP04 values for final version | src/model_1/ | Implements basic physics, sensor/time, interface, cut-off and logging; mathematical checks pass |
 | WP11 Model 2 | WP05 final (needs WP04), WP10 | src/model_2/ | Implements only effects included under D24; comparable interface/logs; mathematical checks pass |
@@ -30,12 +30,12 @@ Three tracks can progress in parallel; arrows show the main gates. Provisional w
 
 ```
 PAPER (no hardware)     WP01 → WP02 → WP03 → WP06 → WP07 → WP08 (provisional → final after WP04)
-RIG   (hardware)        rig firmware supplied + sensor wired → WP09a → WP04 → WP13
+RIG   (hardware)        sensor wired → WP09a → WP04 → WP13
 SOFTWARE (no hardware)  WP05 (provisional) → WP10 → WP11 (after WP04/WP05 final);  WP12 test-first
 JOIN                    WP09b → WP14 → WP15 → WP16 → WP17
 ```
 
-The researcher-side gates of the rig track are supplying the modified rig firmware (D18) and wiring the sensor (D19).
+The researcher-side gate of the rig track is wiring the sensor (D19); the rig firmware baseline is the bundled StepExample (D32).
 
 ## Task details
 
@@ -64,7 +64,7 @@ Define minimal classes/interfaces and responsibilities, physical vs simulation a
 Specify mathematical verification cases with independent expectations, held-out physical validation, controller scenarios and common evaluation rules. Define data schema, repeatability, initial conditions, units, metrics, acceptance tolerances, classification, independent evidence and safety. Predefine generation budget, prompt constraints, fault eligibility/selection and fallback injection; avoid outcome-driven selection. Write the fixed clean-room generation prompt and fix which AI family generates controllers (D29). Define the rig run plan and the near-limit repeat rule (D27) and the verdict comparison rules (D25). Mark unresolved prerequisites explicitly.
 
 ### WP09a — Rig I/O firmware and serial adapter
-Start from the researcher-supplied rig firmware (D18). Extend it as a serial I/O server for both pumps and the sensor (D21), with an independent maximum-ON-time cut-off that is logged when it fires (D27); start with a conservative limit and update it from WP04 calibration. Generate the host-side serial hardware adapter and logger. Document code generation prompts and changes; verify interface compatibility. Review and bound physical execution; no unapproved upload or actuation.
+Start from the bundled StepExample, which is the rig firmware apart from a pump identifier change (D32); make one firmware drive both pumps. Extend it as a serial I/O server for both pumps and the sensor (D21), with an independent maximum-ON-time cut-off that is logged when it fires (D27); start with a conservative limit and update it from WP04 calibration. Generate the host-side serial hardware adapter and logger. Document code generation prompts and changes; verify interface compatibility. Review and bound physical execution; no unapproved upload or actuation.
 
 ### WP09b — Reference controller
 Generate the shared Python reference controller against the WP07 interface, using the clean-room procedure and prompt from WP08 (D29); the researcher runs the generation session outside this repository and adds the output. Verify that the same source runs against the rig adapter (WP09a) and a simulation adapter. Document prompts and changes. Reference controller is only considered physically validated after evidence from WP13; until then label it candidate.
