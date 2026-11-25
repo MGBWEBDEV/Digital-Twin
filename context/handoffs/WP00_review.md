@@ -22,6 +22,12 @@
 - Prompt/log reference or commit identifier if available: Claude Code session of 2026-11-25; commit to follow.
 - Next suggested atomic task (do not execute): WP00 review part 2 (below).
 
+## Part 2 progress
+
+- **Topic 1, fidelity axis — resolved 2026-11-25.** D24 (Model 2 = Model 1 plus rig effects that are measurable; inclusion rule; visual settled-reading and safe-mark rules) and D25 (models compared by agreement of their pass/fail verdicts with the rig's, against margin to the limit; APPROVED in principle, details depend on topic 3). Updated `context/decisions.md` (D08 superseded, D13 narrowed), `context/master_context.md` (model and outcome sections), `context/roadmap.md` (WP04, WP05, WP11 details). Covers findings 1 and 4 below; finding 2 is addressed by D25's margin reporting and continues in topic 2.
+- Researcher discussion points carried forward: communication lag is expected to be negligible but is measured once; tube priming may be the largest effect; a sensor-landmark task ("fill to X % using the sensor as reference, then timed") is a strong candidate for topic 2 because it combines sensor and timing near a limit.
+- **Next: topic 2, scope** (reduce FR01–FR08 to three or four; consider the sensor-landmark task). Then topic 3 (ground truth) and topic 4 (roadmap re-sequencing).
+
 ## Open review findings for part 2 (research design)
 
 1. **Fidelity axis (B5).** Model 1 and Model 2 may be mathematically equivalent (D08, D13). Fix a provisional fidelity axis early, e.g. Model 2 adds per-pump calibrated rates, start/stop lag or water delivered after OFF, sensor delay/hysteresis, serial latency (D21) and overflow behaviour.

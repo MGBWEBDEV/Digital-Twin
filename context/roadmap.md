@@ -35,10 +35,10 @@ Define component relationships, water transfer and information exchange, externa
 Choose a small set from master context candidates. Define IDs, tasks, preconditions, logical and physical expected outcomes, completion/safety and acceptance criteria; identify infeasible requirements given Boolean sensor and no direct volume measurement. Mark provisional numerical criteria TBD; plan mathematical checks independently.
 
 ### WP04 — Physical characterization
-First design and obtain researcher approval for safe experiments; then researcher supplies measured data. Read initial/final syringe volume, commanded pump duration and sensor transitions; characterize host–ESP32 command and sensor-report latency (D21); investigate repeatability and potential fidelity differentiators. Separate parameter-fitting observations from held-out validation. No fabricated readings; can deliver protocol only as partial if no hardware access. Do not deploy code or activate physical equipment without approval.
+First design and obtain researcher approval for safe experiments; then researcher supplies measured data. Read initial/final syringe volume, commanded pump duration and sensor transitions; characterize host–ESP32 command and sensor-report latency (D21); investigate repeatability. Measure the D24 candidate effects (tube priming, run-on after OFF, sensor trigger point and switch-off level, reporting/communication delay) using settled visual readings and host timestamps, and compare each with the syringe reading resolution and timestamp resolution; report early whether any effect is measurable (feasibility check before Model 2 is built). Separate parameter-fitting observations from held-out validation. No fabricated readings; can deliver protocol only as partial if no hardware access. Do not deploy code or activate physical equipment without approval.
 
 ### WP05 — Mathematical modelling
-Specify Model 1 and Model 2 with units, states, inputs, time updates, transfer and sensor rules, initialization, physical/operational boundaries, assumptions and parameter source. Confirm differences are not mathematically equivalent under identical assumptions. No invented rates, capacity or thresholds. Document how boundary events remain observable.
+Specify Model 1 and Model 2 with units, states, inputs, time updates, transfer and sensor rules, initialization, physical/operational boundaries, assumptions and parameter source. Confirm differences are not mathematically equivalent under identical assumptions. Apply the D24 inclusion rule to WP04 evidence and list included and excluded effects with reasons. No invented rates, capacity or thresholds. Document how boundary events remain observable.
 
 ### WP06 — Controller behavioral modelling
 Derive normal and exceptional paths from requirements. States/actions/conditions/timers/transitions, guard conditions and termination, possible state machine diagram. Keep normative behavior separate from AI implementation strategy; map requirement IDs to expected states and observable events.
@@ -56,7 +56,7 @@ Generate the shared Python controller code and the host-side serial hardware ada
 Generate the minimal basic model with volume, intake/outtake transfer, Boolean sensor, clock and log support. Use shared interface; verify independent mathematical cases, unit conventions and boundary handling.
 
 ### WP11 — Model 2 implementation
-Generate justified additional physics/parameters without changing controller-facing API or unrelated execution semantics. Verify the extended mathematical behavior and document differences with Model 1. Avoid duplicate independent changes that confound comparison.
+Generate only the Model 2 effects included under D24 (per WP05), without changing controller-facing API or unrelated execution semantics. Verify the extended mathematical behavior and document differences with Model 1. Avoid duplicate independent changes that confound comparison.
 
 ### WP12 — Testing framework
 Generate reusable runner, scenario initialization, structured logs, logical and physical outcome checks and independent mathematical verification. Check evaluator using independently hand-derived passing/failing cases. Keep model-specific verification separate from common controller requirements; report inconclusive when evidence is insufficient.

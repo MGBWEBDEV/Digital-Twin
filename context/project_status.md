@@ -6,7 +6,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 | WP | Status | Owner | Notes |
 |---|---|---|---|
-| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 (research-design proposals) pending |
+| WP00 | Ready for review | Claude Code (review fixes) | Scaffold reviewed 2026-11-25; part 1 fixes applied (see `context/handoffs/WP00_review.md`). Part 2 in progress: topic 1 (fidelity axis) resolved as D24/D25 |
 | WP01 | Pending | — | Can start from confirmed facts (D18, D19, D21) and references; modified rig firmware not yet supplied |
 | WP02 | Pending | — | WP01 |
 | WP03 | Provisional | — | Draft at `design/functional_requirements.md` (D23); needs reduction to a small subset and alignment with WP01–02 |
@@ -36,7 +36,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP00 review, part 2: research-design proposals (fidelity axis, ground truth, fault selection and generation isolation, scope reduction, roadmap re-sequencing), as listed in `context/handoffs/WP00_review.md`. Then WP01 — physical system definition.
+WP00 review, part 2, remaining topics: scope reduction (next), ground truth, fault selection and generation isolation, roadmap re-sequencing, as listed in `context/handoffs/WP00_review.md`. Then WP01 — physical system definition.
 
 ## Change log
 
@@ -48,3 +48,5 @@ WP00 review, part 2: research-design proposals (fidelity axis, ground truth, fau
 - Workspace recovery, 25 November 2026. The complete StepExample directory and upstream license are included under `references/LabAutomationKits/`. Every file was checked against upstream commit `a22a6b981e1f0cfd5d0311b571e7998846d37a7d`.
 
 - WP00 review part 1, 2026-11-25 (Claude Code). Researcher decisions recorded (D18–D23); requirements draft moved to `design/`; master context, README, roadmap (WP04, WP09 notes), templates and agent instructions aligned; `.gitignore` keeps reference `.vscode/` files; fetch script pinned to the reference commit and verified to reproduce the bundled snapshot byte-for-byte. Status line on firmware corrected.
+
+- WP00 review part 2, topic 1, 2026-11-25 (Claude Code with researcher). Fidelity axis approved (D24, supersedes D08) and model comparison criterion approved in principle (D25); master context and roadmap WP04/WP05/WP11 updated.
