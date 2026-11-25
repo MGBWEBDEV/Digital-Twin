@@ -1,6 +1,6 @@
 # Software architecture (WP07)
 
-> **Status: Approved by researcher 2026-11-25 (agent-completed by Claude Code).** Minimal architecture for running one controller unchanged against the rig, Model 1 and Model 2, logging every run and judging it independently. Built on WP01–WP03 and WP06. **WP05 has not been done yet** (not even provisionally), so the equation-to-method mapping in section 8 is provisional, taken from the master context and D24, and must be revisited after WP05. Numbers are placeholders (D34). D37 (controller code interface) and D38 (timing, update order and cut-off semantics) approved.
+> **Status: Approved by researcher 2026-11-25 (agent-completed by Claude Code).** Minimal architecture for running one controller unchanged against the rig, Model 1 and Model 2, logging every run and judging it independently. Built on WP01–WP03 and WP06. Section 8 was revised on 2026-11-25 after provisional WP05 (`design/mathematical_models.md`); that revision was approved by the researcher 2026-11-25 and is revisited again after final WP05. Numbers are placeholders (D34). D37 (controller code interface) and D38 (timing, update order and cut-off semantics) approved.
 
 ## 1. Principles
 
@@ -169,27 +169,30 @@ One directory per run: `experiments/logs/<run_id>/`. Raw files are never edited 
 | `run.json` | Harness | Run ID, date, git commit, controller file and SHA-256, environment and model version, all parameter values with their P/R IDs, scenario ID, Δt_c, Δt_s, end reason (normal, invalid) | All |
 | `calls.csv` | Harness | `t_ms, sensor_env, sensor_given, intake, outtake` (one row per call) | All |
 | `events.csv` | Environment | `t_ms, source, event, detail`: command sent/acknowledged, sensor edge reported, cut-off, firmware start-up, late call, run invalidated | All |
-| `truth.csv` | Simulation environment | `t_ms, volume_ml, intake_flowing, outtake_flowing, overflow` (per simulation step or decimated); never read by the controller or harness | Models only |
+| `truth.csv` | Simulation environment | `t_ms, volume_ml, intake_flowing, outtake_flowing, overflow, spill_ml, shortfall_ml` and, in Model 2, `tube_fill_ml` (per simulation step or decimated; WP05 section 4.8); never read by the controller or harness | Models only |
 | `manual.csv` | Researcher | `point, time, volume_ml, uncertainty_ml, note` (settled readings before and after; D24, D33) | Rig only |
 | `verdict.json` | Evaluator | Each WP03 check: pass/fail/undetermined with evidence; inferred end state (WP06 section 6) | All |
 
 Calibration data from WP04 is stored separately under `experiments/data/` and never mixed with scored runs.
 
-## 8. TankSystem and equation-to-method mapping (provisional until WP05)
+## 8. TankSystem and equation-to-method mapping (aligned with provisional WP05)
 
-`TankSystem` is the simulated counterpart of the physical tank, its two pumps and its sensor. It is the only object the simulation environment talks to, and it is built from one class per physical part, following the master-context mapping (tank → conservation, pump → transferred volume, sensor → threshold).
+`TankSystem` is the simulated counterpart of the physical tank, its two pumps and its sensor. It is the only object the simulation environment talks to, and it is built from one class per physical part, following the master-context mapping (tank → conservation, pump → transferred volume, sensor → threshold). Equations, states, initialization and boundaries are specified in `design/mathematical_models.md` (WP05, provisional; section numbers below refer to it). Revised 2026-11-25 after provisional WP05; approved by researcher 2026-11-25.
 
 ```mermaid
 classDiagram
   class TankSystem {
-    +reset(v0_ml)
-    +step(dt_ms, intake_cmd, outtake_cmd)
+    +reset(v0_ml, tube_fill_ml)
+    +step(dt_ms, intake_on, outtake_on)
     +sensor_wet() bool
     +truth() dict
   }
   class WaterTank {
     +volume_ml
     +capacity_ml
+    +dead_volume_ml
+    +spill_ml
+    +shortfall_ml
     +overflow
     +add(ml)
     +remove(ml) float
@@ -198,30 +201,48 @@ classDiagram
     +rate_ml_per_s
     +volume_moved(dt_ms, switched_on) float
   }
+  class PrimingRunOnPump {
+    +tube_volume_ml
+    +tube_fill_ml
+    +runon_ml
+    +runon_left_ml
+  }
   class WaterLevelSensor {
     +level_ml
     +update(dt_ms, volume_ml)
     +is_wet() bool
   }
+  class DelayedSensor {
+    +trigger_offset_ml
+    +delay_ms
+  }
   TankSystem "1" *-- "1" WaterTank
   TankSystem "1" *-- "2" Pump : intake, outtake
   TankSystem "1" *-- "1" WaterLevelSensor
+  Pump <|-- PrimingRunOnPump : Model 2 intake
+  WaterLevelSensor <|-- DelayedSensor : Model 2
 ```
 
-In each `TankSystem.step`: the intake pump reports the volume it moved, the tank adds it; the outtake pump reports its volume, the tank removes what is available; the sensor is updated with the new volume. `switched_on` is the command after the cut-off.
+In each `TankSystem.step` (one simulation step Δt_s, WP05 sections 4.4 and 5.2): the intake pump reports the volume that reaches the tank and the tank adds it, holding V at C and counting the excess as spill; then the outtake pump reports its volume and the tank removes what is available above the dead volume, counting the rest as shortfall; then the sensor is updated with the new volume. `switched_on` is the effective state after the command delay and the cut-off (environment, WP05 section 4.3). Intake before outtake is a fixed convention.
 
-| Concept (master context, D24) | Class and method | Model 1 | Model 2 (only effects WP04 qualifies) |
+| Concept (WP05) | Class and method | Model 1 | Model 2 (only effects WP04 qualifies) |
 |---|---|---|---|
-| Water balance V(t+Δt) = V(t) + (u_in Q_in − u_out Q_out) Δt | `WaterTank.add` / `remove`, driven by `TankSystem.step` | As written | Same balance; the pump volumes include the effects below |
-| Volume moved by a pump | `Pump.volume_moved` | rate × dt while ON, nothing while OFF | Adds the qualifying effects |
-| Tube priming | `Pump.volume_moved` (intake) | Absent | No water reaches the tank until the tube is filled (candidate P12) |
-| Run-on after OFF | `Pump.volume_moved` | Absent | Extra volume after OFF (candidate P13) |
-| Sensor rule S = (V ≥ V_sensor) | `WaterLevelSensor.update` / `is_wet` | Exact at P05 | Measured trigger point and response delay (candidate P14) |
-| Communication delay | Simulation environment delays (section 6), not TankSystem | 0 | Measured value (candidate P15) |
-| Overflow | `WaterTank.add` sets `overflow` when V > C; volume is not silently clamped (master context) | Same | Same |
-| Empty tank | `WaterTank.remove` returns only the water available and logs the shortfall | Same | Same |
+| Water balance, sections 4.4, 4.6 | `WaterTank.add` / `remove`, driven by `TankSystem.step` | As specified | Same class, unchanged |
+| Volume moved by a pump | `Pump.volume_moved` | Q · Δt_s while ON, 0 while OFF | `PrimingRunOnPump` for the intake; outtake stays `Pump` (WP05 section 5.2) |
+| E1 tube priming, section 5.2 | `PrimingRunOnPump.volume_moved` | Absent | Pumped water fills the tube (V_p = Q_in · P12) before reaching the tank; tube fill kept while OFF; start fill f0 given to `reset` |
+| E2 run-on, section 5.2 | `PrimingRunOnPump.volume_moved` | Absent | V_ro (P13) pumped after every effective OFF edge, including a cut-off |
+| Sensor rule, sections 4.5, 5.3, 5.4 | `WaterLevelSensor.update` / `is_wet` | V ≥ V_sensor (P05), no delay | `DelayedSensor`: threshold V_sensor + δ_trig (TBD, 0), delay d_s (P14) |
+| E5 communication delay, section 5.5 | Simulation environment delays (section 6), not TankSystem | 0 | d_c, d_r (P15) |
+| Cut-off, section 4.3 | Simulation environment (section 6) | Same | Same |
+| Overflow, section 4.8 | `WaterTank.add`: V held at C, excess added to `spill_ml`, `overflow` flag and event | Same | Same |
+| Empty tank, section 4.8 | `WaterTank.remove`: returns only water above `dead_volume_ml` (P09), shortfall added to `shortfall_ml`, `outtake_dry` event | Same | Same |
+| Mass balance, sections 4.8, 5.7 | Checked by WP10/WP11 tests from `truth()` | V + spill − shortfall = V0 + in − out | Adds tube fill f on the left and f0 on the right |
 
-**How the two models share code.** `src/model_1/` defines `WaterTank`, `Pump`, `WaterLevelSensor` and `TankSystem`. `src/model_2/` reuses `WaterTank` unchanged (the shared water balance, D24) and defines subclasses of `Pump` and `WaterLevelSensor` that add only the effects WP04 qualifies. The difference between the models is therefore visible in those two subclasses alone.
+**Initialization** (`reset`, WP05 sections 4.7, 5.7): V = V0, spill and shortfall 0, pumps OFF, sensor state computed from V0 (wet if V0 ≥ threshold), delay buffers filled with the initial values, tube fill f0 (Model 2). V0 outside [V_dead, C] is rejected before the run.
+
+**Step size.** Δt_s = 10 ms is kept (WP05 section 2): all placeholder delays are whole multiples of it, and the Model 1 step rule is exact, so the step size is not a fidelity difference. Delays in Model 2 must be whole multiples of Δt_s, or their rounding is recorded.
+
+**How the two models share code.** `src/model_1/` defines `WaterTank`, `Pump`, `WaterLevelSensor` and `TankSystem`. `src/model_2/` reuses `WaterTank` unchanged (the shared water balance, D24) and defines the subclasses `PrimingRunOnPump` and `DelayedSensor` with only the effects WP04 qualifies; Model 2 delay parameters for the environment are supplied with the model. With all Model 2 parameters zero the subclasses behave exactly as the Model 1 classes (WP05 section 6.3), which is itself a test. The difference between the models is therefore visible in those two subclasses and the delay parameters alone.
 
 **Clock.** `Clock` holds integer-millisecond time (D38). The simulation clock is advanced by the simulation environment in steps of Δt_s; the rig clock reads the computer's monotonic time since run start. `Environment.now_ms()` delegates to it; the controller never sees it directly.
 
@@ -262,7 +283,7 @@ Independent ON/OFF per pump; sensor reported on change and on request; cut-off w
 
 ## 13. Open points
 
-- WP05: replaces section 8 with the specified equations; may change Δt_s.
+- WP05: section 8 revised after provisional WP05 (2026-11-25); revisit after final WP05 (WP04 values, included effects).
 - WP08: prompt wording of the task labels; cut-off margin; final R/P values.
 - WP09a: protocol (D16); how the adapter normalizes the sensor once U14/U17 are known.
 - Run ID scheme and how manual readings are entered (form or hand-edited CSV): decide in WP08.

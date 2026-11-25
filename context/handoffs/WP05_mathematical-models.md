@@ -1,7 +1,7 @@
 # Atomic handoff — WP05 (provisional)
 
 - Agent / model version if known: Claude Code, Claude Opus 5.5 (`claude-opus-5-5`), 2026-11-25.
-- Status: Approved by researcher 2026-11-25 (provisional; final version after WP04). `design/software_architecture.md` section 8 revision still awaiting review.
+- Status: Approved by researcher 2026-11-25 (provisional; final version after WP04). `design/software_architecture.md` section 8 revision approved by researcher 2026-11-25.
 - Scope completed: Model 1 and Model 2 specified with units, parameters (placeholder IDs only), states, inputs, per-step update rules, sensor rule, initialization, boundaries (overflow with spill, empty tank with shortfall and dead volume, cut-off, end of run) and mass balance; argument that the models are not mathematically equivalent (counterexample per effect, list of variations that are equivalent, nesting); D24 table of included / candidate / excluded effects; identifiability notes for WP04; hand-calculated check cases M1-1…M1-12 and M2-1…M2-11. Software architecture section 8 updated to match. No code written.
 - Created or modified paths:
   - `design/mathematical_models.md` (new)
@@ -31,5 +31,5 @@
   - WP08: section 10 (f0, E3, cut-off margin, FR01-P1 calibration form).
   - WP10: sections 2–4, checks 9.1–9.2; `design/software_architecture.md` section 8.
   - WP11: sections 5–7, checks 9.3–9.4 (recompute with final values).
-- Prompt/log reference or commit identifier if available: researcher prompt "Execute WP05 (provisional) only…" (2026-11-25); WP05 committed after researcher approval; `design/software_architecture.md` changes left uncommitted pending review.
-- Next suggested atomic task (do not execute): researcher review of the revised architecture section 8; then WP10 Model 1 in a fresh session (or WP09a / WP12 per `context/project_status.md`).
+- Prompt/log reference or commit identifier if available: researcher prompt "Execute WP05 (provisional) only…" (2026-11-25); WP05 committed as e8c3743; architecture section 8 revision committed after approval.
+- Next suggested atomic task (do not execute): WP10 Model 1 in a fresh session (or WP09a / WP12 per `context/project_status.md`).
