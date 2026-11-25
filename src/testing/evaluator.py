@@ -12,7 +12,10 @@ Results per check: "pass", "fail", "undetermined" (WP03 section 6) or
 "not_applicable" (the check's condition does not arise in this run, e.g.
 FR03-L2 when the sensor input never becomes wet). Overall verdict: "invalid"
 (the run is not scored), else "fail" if any check fails, else "undetermined"
-if any check is undetermined, else "pass".
+if any check is undetermined, else "pass". A run that the harness ended with
+"controller_error" (the controller raised an error or gave a wrong answer)
+fails with the single check "controller_error" unless the setup was invalid
+(D42 (1)). Every scored run also gets the check "determinism_replay" (D42 (3)).
 
 Usage: PYTHONPATH=src python3 -m testing.evaluator <run_dir> [<run_dir> ...]
 writes <run_dir>/verdict.json and prints the overall verdict.
@@ -26,12 +29,13 @@ from testing import parameters as parameters_module
 from testing.runfiles import RunFileError, read_run
 from testing.scenarios import SCENARIO_RUNS
 
-EVALUATOR_VERSION = "0.1.0"
+EVALUATOR_VERSION = "0.3.0"
 
 PASS = "pass"
 FAIL = "fail"
 UNDETERMINED = "undetermined"
 NOT_APPLICABLE = "not_applicable"
+CONTROLLER_ERROR = "controller_error"   # end reason written by the harness (D42)
 
 VOLUME_EPS_ML = 1e-9      # floating-point guard for volume comparisons only
 SIMULATED = ("model_1", "model_2", "stub")
@@ -110,8 +114,12 @@ def validity_problems(files, case, p):
     problems = []
     env = run["environment"]
 
-    if run["end_reason"] != "normal":
+    crashed = run["end_reason"] == CONTROLLER_ERROR
+    if run["end_reason"] not in ("normal", CONTROLLER_ERROR):
         problems.append(f"end_reason is {run['end_reason']!r}")
+    if crashed and not any(e.event == CONTROLLER_ERROR for e in files.events):
+        problems.append("end_reason is 'controller_error' but events.csv has no "
+                        "controller_error event")
     for e in files.events:
         if e.event == "run_invalidated":
             problems.append(f"run_invalidated event at {fmt_s(e.t_ms)}: {e.detail}")
@@ -143,9 +151,9 @@ def validity_problems(files, case, p):
     times = [c.t_ms for c in calls]
     if any(b <= a for a, b in zip(times, times[1:])):
         problems.append("call times not strictly increasing")
-    if not 0 <= times[0] < dt:
+    if times and not 0 <= times[0] < dt:
         problems.append(f"first call at {fmt_s(times[0])}, expected t = 0")
-    if times[-1] < t_end:
+    if times and times[-1] < t_end and not crashed:   # a crash ends the log early (D42)
         problems.append(f"call log ends at {fmt_s(times[-1])}, before T_end {fmt_s(t_end)}")
     if env in SIMULATED and times != [k * dt for k in range(len(times))]:
         problems.append("simulated call times are not k * dt_call")
@@ -458,6 +466,10 @@ def evaluate_files(files, params=None, scenarios=None):
     calls = files.calls
     intervals = intake_intervals(calls)
     t_w = first_wet_input(calls)
+
+    if run["end_reason"] == CONTROLLER_ERROR:
+        return controller_error_verdict(verdict, files, intervals, t_w, obs)
+
     case_a = not calls[0].sensor_given      # case selection by the first input
 
     checks = []
@@ -473,6 +485,7 @@ def evaluate_files(files, params=None, scenarios=None):
         checks.append(single_interval_check(cid, intervals, ms(p["R02"])))
     if "FR08" in case.groups:
         checks += checks_fr08(files, calls, intervals, obs, case, p)
+    checks.append(determinism_check(files))
 
     results = {c["result"] for c in checks}
     if FAIL in results:
@@ -511,6 +524,61 @@ def evaluate_files(files, params=None, scenarios=None):
             "notes": obs["notes"],
         },
         margins=margins,
+    )
+
+
+def determinism_check(files):
+    """D42 (3), researcher 2026-11-25: after the run the harness gives a new
+    controller instance the recorded inputs; any different answer (event
+    `replay_differs`) fails the run. Logs without a recorded replay
+    (hand-written logs) make the check not applicable."""
+    cid = "determinism_replay"
+    differs = [e for e in files.events if e.event == "replay_differs"]
+    if differs:
+        return check(cid, FAIL, f"replay of the recorded inputs gave a different answer: "
+                                f"{differs[0].detail}")
+    replay = files.run.get("determinism_replay") or {}
+    if replay.get("checked") and replay.get("identical"):
+        return check(cid, PASS, "replay of the recorded inputs gave identical answers")
+    if replay.get("checked"):
+        return check(cid, FAIL, f"run.json records a replay difference: "
+                                f"{replay.get('first_difference')}")
+    return check(cid, NOT_APPLICABLE, "no replay recorded in run.json")
+
+
+def controller_error_verdict(verdict, files, intervals, t_w, obs):
+    """A controller that raised an error or answered with something other than
+    two booleans fails the run (D42 (1), researcher 2026-11-25). The harness
+    stopped calling it at that point and switched both pumps OFF, so the WP03
+    checks are not computed on the shortened log; the error is reported as
+    evidence instead."""
+    e = next(e for e in files.events if e.event == CONTROLLER_ERROR)
+    calls = files.calls
+    return dict(
+        verdict,
+        overall=FAIL,
+        invalid_reasons=[],
+        case=None,
+        checks=[check(CONTROLLER_ERROR, FAIL,
+                      f"controller error at {fmt_s(e.t_ms)}: {e.detail}; "
+                      f"{len(calls)} call(s) completed before it; the harness then "
+                      "switched both pumps OFF")],
+        inferred_end_state="CONTROLLER_ERROR",
+        observations={
+            "controller_error_ms": e.t_ms,
+            "controller_error": e.detail,
+            "calls_completed": len(calls),
+            "t_w_ms": t_w,
+            "intake_intervals_ms": [list(iv) for iv in intervals],
+            "cutoff_events_ms": [x.t_ms for x in files.events if x.event == "cutoff"],
+            "volume_source": obs["source"],
+            "v0_ml": obs["v0"],
+            "v_end_ml": obs["v_end"],
+            "v_peak_ml": obs["v_peak"],
+            "computed_overflow": obs["overflow"],
+            "notes": obs["notes"],
+        },
+        margins={},
     )
 
 

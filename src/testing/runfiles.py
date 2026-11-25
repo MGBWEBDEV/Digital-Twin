@@ -93,7 +93,7 @@ def _read_csv(path, required):
         return [(i + 2, row) for i, row in enumerate(reader)]
 
 
-def read_calls(path):
+def read_calls(path, allow_empty=False):
     calls = []
     for line, row in _read_csv(path, CALL_COLUMNS):
         w = f"{os.path.basename(path)} line {line}"
@@ -104,7 +104,7 @@ def read_calls(path):
             parse_bool(row["intake"], w),
             parse_bool(row["outtake"], w),
         ))
-    if not calls:
+    if not calls and not allow_empty:
         raise RunFileError(f"{path}: no calls")
     return calls
 
@@ -166,7 +166,9 @@ def read_run(run_dir):
             raise RunFileError(f"{run_path}: missing key {key!r}")
 
     files = RunFiles(run=run,
-                     calls=read_calls(os.path.join(run_dir, "calls.csv")),
+                     # A controller that crashed in its constructor made no calls (D42).
+                     calls=read_calls(os.path.join(run_dir, "calls.csv"),
+                                      allow_empty=run["end_reason"] == "controller_error"),
                      events=read_events(os.path.join(run_dir, "events.csv")))
     if run["environment"] == "rig":
         manual = os.path.join(run_dir, "manual.csv")

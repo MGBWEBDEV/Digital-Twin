@@ -31,7 +31,8 @@ class OracleCase(unittest.TestCase):
     def assertAllPass(self, verdict, expected_ids):
         self.assertEqual(verdict["overall"], "pass", verdict["checks"])
         res = self.results(verdict)
-        self.assertEqual(sorted(res), sorted(expected_ids))
+        # every scored run also gets determinism_replay (D42 (3)); not applicable here
+        self.assertEqual(sorted(res), sorted(expected_ids + ["determinism_replay"]))
         for cid, r in res.items():
             self.assertIn(r, ("pass", "not_applicable"), cid)
 

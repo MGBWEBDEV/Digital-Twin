@@ -28,17 +28,17 @@ python3 -m unittest discover -s src -t src                                      
   "request": {"task": "FR03", "parameter": 0.0, "v_sensor_ml": 24.0,
               "q_in_ml_per_s": 1.0, "t_deadline_s": 30.0},
   "parameters": {"R01": 0.1, "R02": 0.5, "…": "every ID in parameters.py"},
-  "dt_call_ms": 100, "end_reason": "normal | invalid"
+  "dt_call_ms": 100, "end_reason": "normal | invalid | controller_error"
 }
 ```
 
 Other keys (date, commit, controller hash, `dt_sim_ms`, …) are kept by the harness and ignored here.
 
 - `calls.csv`: `t_ms, sensor_env, sensor_given, intake, outtake` (booleans 0/1 or true/false).
-- `events.csv`: `t_ms, source, event, detail`. Event names read: `cutoff` (FR08-L4), `run_invalidated` (run not scored), `late_call` (reported only).
+- `events.csv`: `t_ms, source, event, detail`. Event names read: `cutoff` (FR08-L4), `run_invalidated` (run not scored), `controller_error` (run fails, D42), `replay_differs` (run fails, D42), `late_call` (reported only). `run.json` key `determinism_replay` (`checked`, `identical`, `first_difference`) is read for the check `determinism_replay`.
 - `truth.csv` (models): at least `t_ms, volume_ml, intake_flowing, outtake_flowing, overflow, spill_ml, shortfall_ml`; extra columns are ignored. First row at t = 0; last row at or after T_end + R09 (otherwise V_end is undetermined).
 - `manual.csv` (rig): `point, time, volume_ml, uncertainty_ml, note`; points `start`, `end` and optionally `peak`.
 
 ## Results
 
-Per check: `pass`, `fail`, `undetermined`, `not_applicable`. Overall: `invalid` (not scored; reasons listed), else `fail` if any check fails, else `undetermined` if any check is undetermined, else `pass`. Every verdict carries `provisional: true` while any parameter is a placeholder. S4 scores FR08 and FR03-L1. On the rig, FR08-P2 uses the settled end reading as the peak when the outtake never ran; otherwise it needs a `peak` reading (D41).
+Per check: `pass`, `fail`, `undetermined`, `not_applicable`. Overall: `invalid` (not scored; reasons listed), else `fail` if any check fails, else `undetermined` if any check is undetermined, else `pass`. A run with end reason `controller_error` (the controller raised an error or answered with something other than two booleans) fails with the single check `controller_error`, whose evidence gives the time and the error; its `calls.csv` may be empty (D42 (1)). Every scored run also gets the check `determinism_replay`: fail if the harness's replay of the recorded inputs gave a different answer, pass if it gave identical answers, not applicable if no replay is recorded (D42 (3)). Every verdict carries `provisional: true` while any parameter is a placeholder. S4 scores FR08 and FR03-L1. On the rig, FR08-P2 uses the settled end reading as the peak when the outtake never ran; otherwise it needs a `peak` reading (D41).

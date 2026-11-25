@@ -238,6 +238,48 @@ class TestInvalidRuns(HandCase):
                           hand_truth(5.0, 40.0), request=req)
         self.assertInvalid(v, "request v_sensor_ml")
 
+    def test_controller_error_with_setup_problem_still_invalid(self):
+        """D42 (1): a crash fails the run only when the setup was valid."""
+        run = run_json("S1-10")
+        params = dict(run["parameters"], R05=3.0)
+        v = self.evaluate("S1-10", hand_calls([(0, None)], t_end_ms=4_900),
+                          hand_truth(5.0, 15.0, settled=False),
+                          events=[(5_000, "harness", "controller_error", "boom")],
+                          end_reason="controller_error", parameters=params)
+        self.assertInvalid(v, "parameter R05")
+
+    def test_controller_error_without_event_invalid(self):
+        v = self.evaluate("S1-10", hand_calls([(0, None)], t_end_ms=4_900),
+                          hand_truth(5.0, 15.0, settled=False),
+                          end_reason="controller_error")
+        self.assertInvalid(v, "no controller_error event")
+
+    def test_replay_difference_fails(self):
+        """D42 (3), researcher 2026-11-25."""
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.0, 15.0),
+                          events=[(0, "harness", "replay_differs", "t_ms 0")])
+        self.assertEqual(v["overall"], "fail")
+        self.assertEqual(self.res(v)["determinism_replay"], "fail")
+
+    def test_replay_recorded_identical_passes(self):
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.0, 15.0),
+                          determinism_replay={"checked": True, "identical": True,
+                                              "first_difference": None})
+        self.assertEqual(v["overall"], "pass")
+        self.assertEqual(self.res(v)["determinism_replay"], "pass")
+
+    def test_replay_missing_not_applicable(self):
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.0, 15.0))
+        self.assertEqual(self.res(v)["determinism_replay"], "not_applicable")
+
+    def test_controller_error_fails(self):
+        v = self.evaluate("S1-10", hand_calls([(0, None)], t_end_ms=4_900),
+                          hand_truth(5.0, 15.0, settled=False),
+                          events=[(5_000, "harness", "controller_error", "boom")],
+                          end_reason="controller_error")
+        self.assertEqual(v["overall"], "fail")
+        self.assertEqual(self.res(v), {"controller_error": "fail"})
+
     def test_call_log_ends_before_t_end(self):
         v = self.evaluate("S1-10", hand_calls([(0, 10_000)], t_end_ms=50_000),
                           hand_truth(5.0, 15.0))
