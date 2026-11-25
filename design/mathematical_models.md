@@ -43,7 +43,7 @@ Values are placeholders (D34). "Env" means the shared simulation environment (`d
 | T_max | Cut-off maximum continuous ON time | s | Env, both | 45 | P11 → WP04 (D27) |
 | t_p | Intake priming time at Q_in | s | Model 2, candidate | 2 | P12 → WP04 |
 | V_p | Intake tube volume to fill before water reaches the tank, V_p = Q_in · t_p | mL | Model 2, candidate | 2 | Derived from P06, P12 |
-| f0 | Intake tube fill at the start of a run | mL | Model 2, candidate | 0 | Researcher 2026-11-25: water stays in the tube after OFF, and the planned reset pumps or drains for a fixed time to empty it, so runs start with an empty tube. Reset details and duration in WP08; confirm in WP04 |
+| f0 | Intake tube fill at the start of a run | mL | Model 2, candidate | 0 | Researcher 2026-11-25: water stays in the tube after OFF, and the planned reset pumps or drains for a fixed time to empty it, so runs start with an empty tube. Reset details and duration in WP08; confirm in WP04. 2026-11-25 (D40, approved by researcher): fixed at 0 for every simulated run, no longer an input. Primed-tube cases (f0 = V_p) below are kept only for reference and for WP04 identifiability (section 8); to be revised in final WP05 |
 | V_ro | Intake run-on volume after each effective OFF | mL | Model 2, candidate | 0.5 | P13 → WP04 |
 | δ_trig | Real rising switch point minus V_sensor | mL | Model 2, candidate | TBD, treated as 0 (inactive) | WP04; see section 5.4 |
 | d_s | Sensor response delay | s | Model 2, candidate | 0.1 | P14 → WP04 |

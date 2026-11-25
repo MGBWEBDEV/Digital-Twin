@@ -17,7 +17,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP08 | Pending | — | WP03, WP05–07; provisional before WP04, final after |
 | WP09a | Pending | — | WP01, WP07; starts from bundled StepExample (D32); researcher approval before upload |
 | WP09b | Pending | — | WP03, WP06–08, WP09a; researcher safety review |
-| WP10 | Pending | — | WP05 (provisional), WP07, WP09a interface; TBD placeholders until WP04 |
+| WP10 | Ready for review (provisional) | Claude Code | `src/model_1/` (WaterTank, Pump, WaterLevelSensor, TankSystem, placeholder parameters by ID) and shared simulation pieces in `src/shared/` (Environment interface, SimulationClock, CutOff, DelayLine, SimulationEnvironment with command/report delay slots at zero) (2026-11-25). Standard library only; 46 unittest tests pass (M1-1…M1-12, mass balance, cut-off, conventions). M1-8…M1-12 checked with fixed command schedules, not a controller; closed-loop check waits for harness (WP12) and WP09b. No logger/run-file writer, harness or rig adapter. D40 approved by researcher 2026-11-25 (intake tube always empty at run start; exact fractions). Handoff: `context/handoffs/WP10_model-1.md`. Final version after WP04 values |
 | WP11 | Pending | — | WP05 final (needs WP04), WP10 |
 | WP12 | Pending | — | WP03, WP08 (provisional); test-first with stub plant; final verification with WP10–11 |
 | WP13 | Pending | — | WP04, WP08, WP09b, WP10–12; physical access |
@@ -83,3 +83,5 @@ In a fresh session: WP10 (Model 1, provisional placeholders), WP09a (rig firmwar
 - 2026-11-25: WP05 (provisional) completed by Claude Code (ready for review); `design/software_architecture.md` section 8 revised to match; D39 proposed.
 - 2026-11-25: researcher approved provisional WP05 and D39; stated that runs start with an empty intake tube (reset empties it). Architecture section 8 revision still awaiting review.
 - 2026-11-25: researcher approved the revised section 8 of `design/software_architecture.md` (WP05 follow-up).
+- 2026-11-25: WP10 (provisional) completed by Claude Code (ready for review): Model 1 and shared simulation environment pieces; 46 tests pass; D40 proposed. No controller written.
+- 2026-11-25: researcher approved D40 (tube-fill input removed: intake tube always empty at run start; exact fractions kept); architecture section 8 and WP05 f0 row aligned.

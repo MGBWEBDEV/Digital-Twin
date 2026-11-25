@@ -1,6 +1,6 @@
 # Software architecture (WP07)
 
-> **Status: Approved by researcher 2026-11-25 (agent-completed by Claude Code).** Minimal architecture for running one controller unchanged against the rig, Model 1 and Model 2, logging every run and judging it independently. Built on WP01–WP03 and WP06. Section 8 was revised on 2026-11-25 after provisional WP05 (`design/mathematical_models.md`); that revision was approved by the researcher 2026-11-25 and is revisited again after final WP05. Numbers are placeholders (D34). D37 (controller code interface) and D38 (timing, update order and cut-off semantics) approved.
+> **Status: Approved by researcher 2026-11-25 (agent-completed by Claude Code).** Minimal architecture for running one controller unchanged against the rig, Model 1 and Model 2, logging every run and judging it independently. Built on WP01–WP03 and WP06. Section 8 was revised on 2026-11-25 after provisional WP05 (`design/mathematical_models.md`); that revision was approved by the researcher 2026-11-25 and is revisited again after final WP05. 2026-11-25: `reset` takes the start volume only, because the intake tube is always empty at the start of a run (D40, approved by researcher). Numbers are placeholders (D34). D37 (controller code interface) and D38 (timing, update order and cut-off semantics) approved.
 
 ## 1. Principles
 
@@ -182,7 +182,7 @@ Calibration data from WP04 is stored separately under `experiments/data/` and ne
 ```mermaid
 classDiagram
   class TankSystem {
-    +reset(v0_ml, tube_fill_ml)
+    +reset(v0_ml)
     +step(dt_ms, intake_on, outtake_on)
     +sensor_wet() bool
     +truth() dict
@@ -229,16 +229,16 @@ In each `TankSystem.step` (one simulation step Δt_s, WP05 sections 4.4 and 5.2)
 |---|---|---|---|
 | Water balance, sections 4.4, 4.6 | `WaterTank.add` / `remove`, driven by `TankSystem.step` | As specified | Same class, unchanged |
 | Volume moved by a pump | `Pump.volume_moved` | Q · Δt_s while ON, 0 while OFF | `PrimingRunOnPump` for the intake; outtake stays `Pump` (WP05 section 5.2) |
-| E1 tube priming, section 5.2 | `PrimingRunOnPump.volume_moved` | Absent | Pumped water fills the tube (V_p = Q_in · P12) before reaching the tank; tube fill kept while OFF; start fill f0 given to `reset` |
+| E1 tube priming, section 5.2 | `PrimingRunOnPump.volume_moved` | Absent | Pumped water fills the tube (V_p = Q_in · P12) before reaching the tank; tube fill kept while OFF; tube empty at the start of every run (D40) |
 | E2 run-on, section 5.2 | `PrimingRunOnPump.volume_moved` | Absent | V_ro (P13) pumped after every effective OFF edge, including a cut-off |
 | Sensor rule, sections 4.5, 5.3, 5.4 | `WaterLevelSensor.update` / `is_wet` | V ≥ V_sensor (P05), no delay | `DelayedSensor`: threshold V_sensor + δ_trig (TBD, 0), delay d_s (P14) |
 | E5 communication delay, section 5.5 | Simulation environment delays (section 6), not TankSystem | 0 | d_c, d_r (P15) |
 | Cut-off, section 4.3 | Simulation environment (section 6) | Same | Same |
 | Overflow, section 4.8 | `WaterTank.add`: V held at C, excess added to `spill_ml`, `overflow` flag and event | Same | Same |
 | Empty tank, section 4.8 | `WaterTank.remove`: returns only water above `dead_volume_ml` (P09), shortfall added to `shortfall_ml`, `outtake_dry` event | Same | Same |
-| Mass balance, sections 4.8, 5.7 | Checked by WP10/WP11 tests from `truth()` | V + spill − shortfall = V0 + in − out | Adds tube fill f on the left and f0 on the right |
+| Mass balance, sections 4.8, 5.7 | Checked by WP10/WP11 tests from `truth()` | V + spill − shortfall = V0 + in − out | Adds tube fill f on the left (start fill f0 = 0, D40) |
 
-**Initialization** (`reset`, WP05 sections 4.7, 5.7): V = V0, spill and shortfall 0, pumps OFF, sensor state computed from V0 (wet if V0 ≥ threshold), delay buffers filled with the initial values, tube fill f0 (Model 2). V0 outside [V_dead, C] is rejected before the run.
+**Initialization** (`reset`, WP05 sections 4.7, 5.7): V = V0, spill and shortfall 0, pumps OFF, sensor state computed from V0 (wet if V0 ≥ threshold), delay buffers filled with the initial values, intake tube empty (Model 2; D40). V0 outside [V_dead, C] is rejected before the run.
 
 **Step size.** Δt_s = 10 ms is kept (WP05 section 2): all placeholder delays are whole multiples of it, and the Model 1 step rule is exact, so the step size is not a fidelity difference. Delays in Model 2 must be whole multiples of Δt_s, or their rounding is recorded.
 
