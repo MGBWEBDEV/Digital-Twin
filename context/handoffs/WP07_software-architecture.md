@@ -1,0 +1,25 @@
+# Atomic handoff — WP07 (software architecture)
+
+- Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
+- Status: Approved by researcher 2026-11-25 (WP07, D37, D38)
+- Scope completed: `design/software_architecture.md`. No code written; WP05, WP08, WP09a not started.
+- Created or modified paths:
+  - `design/software_architecture.md` (new): principles; component table and diagram; controller interface (D37); environment interface; integer-ms clock, call and simulation steps and per-call update order with sequence diagram (D38); simulation pipeline with shared delays and cut-off, cut-off semantics; run files; TankSystem composed of WaterTank, Pump ×2 and WaterLevelSensor with class diagram and provisional equation-to-method mapping; Clock class; evaluator boundary; directory layout; trade-offs; requirements on WP09a; open points.
+  - `context/decisions.md`: D37, D38 added (PROPOSED).
+  - `context/project_status.md`: WP07 row, next task, change log.
+  - this file.
+- Checks performed and actual results:
+  - Roadmap WP07 items covered: common interface, rig and simulation adapters, clock semantics and update order, class responsibilities, equation mapping (provisional), logger/evaluator separation, cut-off placement, D29 step shape, sensor normalization in adapter, harness override hook.
+  - Float check: 1900 simulation steps of 10 ms at 1 mL/s from 5 mL give 24.000000000001016 mL, so S2 sees wet at 19.0 s in Model 1 as stated; rounding could also give 19.1 s, which the WP03 oracle allows.
+  - Mermaid diagrams not rendered (no tooling installed).
+- Decisions (proposed vs approved), decision IDs: D37, D38 APPROVED 2026-11-25. Uses D06, D07, D11, D16, D21, D24, D27, D29, D34–D36.
+- Assumptions / changes from previous artifacts:
+  - WP05 was a stated input ("provisional suffices") but does not exist; section 8 maps the master-context equations and D24 candidates instead and is marked provisional.
+  - New placeholder: simulation step Δt_s = 10 ms (D34 rule).
+  - Revision after researcher feedback (same session): `Plant` renamed `TankSystem` and split into `WaterTank`, `Pump`, `WaterLevelSensor` per the master-context candidate classes; `Clock` named; Model 2 reuses `WaterTank` and subclasses `Pump`/`WaterLevelSensor`.
+  - Generated controllers stored under `src/shared/controllers/` (roadmap puts the controller in `src/shared/`).
+  - Commands sent to the rig only on change.
+- Blockers / outstanding questions: WP05 needed to finalize section 8; protocol open under D16 (WP09a).
+- Downstream dependencies: WP05 (section 8, Δt_s), WP08 (sections 3, 7, 13), WP09a (sections 6, 12), WP10/WP11 (sections 4–6, 8), WP12 (sections 7, 9).
+- Prompt/log reference or commit identifier if available: Claude Code session of 2026-11-25; researcher prompt "start, remind me when a new terminal sessions are needed".
+- Next suggested atomic task (do not execute): researcher review of WP07, D37, D38; then, in a fresh session, provisional WP05 or WP09a or WP12.

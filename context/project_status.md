@@ -13,7 +13,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 | WP04 | Pending | — | Needs WP09a and sensor wiring (D19); protocol and pump-only measurements may start earlier with approval |
 | WP05 | Pending | — | WP02; provisional before WP04, final after |
 | WP06 | Approved | Claude Code | `design/controller_behavior.md` (2026-11-25): constraints K1–K7, states, Mermaid state machine and per-call order, transition table mapped to WP03 checks, exceptions X1–X11, evaluator inference, scenario paths, fault-space mapping. D36 approved. Handoff: `context/handoffs/WP06_controller-behavior.md`. Approved by researcher 2026-11-25 |
-| WP07 | Pending | — | WP02–03, WP06; WP05 provisional suffices |
+| WP07 | Approved | Claude Code | `design/software_architecture.md` (2026-11-25): components, controller and environment interfaces, timing/update order, simulation pipeline and cut-off, run files, evaluator boundary, layout, trade-offs, WP09a requirements; TankSystem built from WaterTank, Pump ×2, WaterLevelSensor; Clock; 5 Mermaid diagrams. Equation mapping provisional because WP05 not yet done. D37, D38 approved. Handoff: `context/handoffs/WP07_software-architecture.md`. Approved by researcher 2026-11-25; section 8 to be revisited after WP05 |
 | WP08 | Pending | — | WP03, WP05–07; provisional before WP04, final after |
 | WP09a | Pending | — | WP01, WP07; starts from bundled StepExample (D32); researcher approval before upload |
 | WP09b | Pending | — | WP03, WP06–08, WP09a; researcher safety review |
@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP07 — software architecture (unblocks WP09a and WP10); provisional WP05 may run in parallel. Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
+In a fresh session: provisional WP05, WP09a (rig firmware; needs researcher approval before upload) or WP12 test-first evaluator. Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
 
 ## Change log
 
@@ -78,3 +78,5 @@ WP07 — software architecture (unblocks WP09a and WP10); provisional WP05 may r
 - 2026-11-25: researcher approved WP03 and D35.
 - 2026-11-25: WP06 completed by Claude Code (ready for review); D36 proposed.
 - 2026-11-25: researcher approved WP06 and D36.
+- 2026-11-25: WP07 completed by Claude Code (ready for review); D37, D38 proposed.
+- 2026-11-25: researcher approved WP07 (with TankSystem revision), D37 and D38.
