@@ -1,0 +1,21 @@
+# Local configuration, credentials and editor/build output
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.claude/settings.local.json
+.DS_Store
+.vscode/
+# Keep upstream reference snapshots complete (they include editor files).
+!references/LabAutomationKits/**/.vscode/
+.idea/
+__pycache__/
+*.py[cod]
+.venv/
+build/
+.pio/
+node_modules/
+*.tmp
+# Research datasets and logs are intentionally NOT globally ignored.
+# Review confidentiality and size before staging any real data.

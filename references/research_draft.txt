@@ -1,0 +1,285 @@
+Digital Twin Simulations for testing controller code generated with AI 
+
+Abstract 
+
+ 
+
+​​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​ 
+
+​​ 
+
+ 
+
+1. Introduction  
+
+This research project's main objective is to create a digital twin for a water tank. So we will start by defining what is a digital twin.  Although there is no universally accepted definition of a digital twin, most authors agree that it is a representation or replica of a physical entity or object. The physical entity and its digital representation are connected, and the latter is dynamic, meaning that it reflects the behavior, performance, and condition of its physical counterpart in real time. 
+
+Even though the concept of creating replicas of physical systems dates back to the 1960s, when NASA developed physical replicas of its spacecraft for simulation purposes, the concept of the Digital Twin is generally attributed to Michael Grieves, who formally introduced it in 2002. Since then, the technology has evolved and incorporated new technologies, such as Artificial Intelligence (AI) and the Internet of Things (IoT). 
+
+The main components of a digital twin can be described as follows: 
+
+Physical entity: The real-world object, process, or system that the digital twin represents. 
+
+Sensors and data collection: Sensors and other data sources collect information about the physical entity, including its behavior, performance, and operating conditions. 
+
+Data integration and processing: The data collected through sensors, IoT devices, and other sources is integrated and processed to create and maintain a digital representation that reflects the physical system. 
+
+Analytics and visualization: The processed data is analyzed and visualized to monitor the system's performance, identify potential problems, and discover opportunities for improvement. 
+
+Feedback loop: This is a continuous process that enables the monitoring, analysis, and optimization of the digital twin through data received from the physical entity. Depending on the implementation, information can also be transferred back to the physical system to support operational adjustments. 
+
+According to our literature review, and as highlighted by Segovia and Garcia-Alfaro (2022), there is a lack of standardized approaches to the construction of digital twins, as well as a lack of mature methodologies to guide the process from initial design to the simulation of the complete system. The authors emphasize the need for a design procedure that supports the selection of appropriate techniques and tools to build a digital twin based on the specific requirements of the system. 
+
+Nevertheless, the literature generally suggests that, after studying and understanding the physical entity, an important next step is to develop a virtual model that represents it. This model then provides the foundation for creating simulations, conducting tests, and making predictions about the behavior of the physical system. 
+
+The models therefore form the basis of our research question: How complex does a model need to be in order to detect potential errors introduced by AI-generated code? As a next step, we will review the most common approaches to developing models and evaluate which would be most appropriate for this research project. 
+
+1.1 Ways of creating a Model 
+
+Although there is not a universal framework to model a digital twin, the general consensus is that the model should function as a computational mirror of a real-world entity. Traditional models or simulations are mostly focused on static design validation, in the case of digital twins, the model is characterized by its continuous persistence and a bidirectional data exchange with its physical counterpart (Emmert-Streib, 2023). Given the bidirectional feed of information, sensor measurements update the model’s states and the model returns a response, in the form of prediction or control parameters. This process requires engineering across different levels of abstraction, from mapping the high-level ecosystem, physical behaviors, and structuring the underlying software architecture (Wu et al., 2023). 
+
+1.1.1 Conceptual and Architectural Modeling  
+
+The current literature outlines that researchers establish the digital twin macro-level ecosystem using graphical reference models before defining the underlying code or mathematics. These conceptual frameworks define the structural boundaries and data topologies of the system. For instance, researchers frequently utilize a multi-dimensional graphical reference model depicting the relationships between the physical system, the virtual system, user interfaces, and the connecting data networks (Botín-Sanabria et al., 2022; Hananto et al., 2024). This architectural mapping establishes the standard communication pathways required before the micro-level execution models can be implemented. 
+
+DT architecture, Botín-Sanabria et al., 2022 
+
+1.1.2 Physics-Based Modeling 
+
+Researchers often rely on differential equations for simulating the twin's physical behavior. As the mathematical foundation, the model creates a representation for explicit physical laws such as thermodynamics, electromagnetism, and kinematics. In these physics-based models, researchers select state variables (e.g., temperature, displacement) and parameters (e.g., mass, friction) that map directly to the asset's physical properties, as demonstrated by Chen et al. (2024). Physical measurements from the real-world counterpart are continuously used to calibrate parameters and correct state errors over time. However, this approach is computationally demanding for real-time applications and struggles to capture complex, unmodeled phenomena like localized wear or undocumented degradation (Wu et al., 2023). 
+
+1.1.3 Software and Systems Architecture (Classes/Objects) 
+
+Traditional Software modeling makes use of classes and objects, providing the structural framework that brings mathematical and conceptual models to the digital landscape. Class-based models represent the physical system's components as discrete software entities, organizing their hierarchical relationships, communication protocols, and data pipelines (Ramirez et al., 2025). A class-based software architecture encapsulates the physical behaviors through mathematical models, allowing instantiated objects to route live sensor telemetry into embedded solvers to execute physical behavioral logic and manage autonomous state transitions. 
+
+1.2 Common errors in AI-generated code 
+
+When focusing specifically on Programmable Logic Controller (PLC) code, Fakih et al. (2024) identify several challenges associated with using Large Language Models (LLMs) to generate industrial control programs. These include: 
+
+Structurally invalid programs: Generated code may not follow the syntax or structural requirements of the target PLC programming language. 
+
+Lack of execution guarantees: Code that is generated successfully is not necessarily guaranteed to execute correctly. 
+
+Limited support for specialized programming languages: General-purpose LLMs may have difficulties generating code for specialized industrial programming languages. 
+
+Lack of explainability and verification: Generated programs require additional verification to establish that they behave as intended. 
+
+To address these challenges, Fakih et al. (2024) developed a framework called LLM4PLC. It combines LLMs with external verification tools, including grammar checkers, compilers, and formal verification techniques. Their experimental results showed an improvement in the generation success rate from 47% to 72%. The study demonstrates the importance of incorporating verification mechanisms into the process of generating PLC code. 
+
+On a broader level, several studies have investigated the types of bugs introduced by LLMs when generating software code. Tambon et al. (2025) conducted an empirical study examining 333 bugs in code generated by three LLMs: CodeGen, PanGu-Coder, and Codex. Based on their findings, they proposed a taxonomy consisting of ten categories of errors: 
+
+Error category 
+
+Explanation 
+
+Misinterpretations 
+
+The AI misunderstands the requirements. 
+
+Syntax errors 
+
+The generated code does not follow the programming language's syntax. 
+
+Silly mistakes 
+
+Basic programming mistakes. 
+
+Prompt-biased code 
+
+The generated code is excessively influenced by particular elements of the prompt. 
+
+Missing corner cases 
+
+The code does not handle less common situations. 
+
+Wrong input type 
+
+Incorrect data types are used. 
+
+Hallucinated objects 
+
+The AI references objects that do not exist. 
+
+Wrong attributes 
+
+The AI uses incorrect attributes or properties. 
+
+Incomplete generation 
+
+The generated code is missing necessary parts. 
+
+Non-prompted consideration 
+
+The AI introduces functionality or behavior that was not requested. 
+
+ 
+
+More recently, Gao et al. (2025) presented a broader survey of bugs in AI-generated code. Their work synthesizes findings from previous research to provide an overview of the types of bugs and defects found in AI-generated programs, as well as the approaches used to detect and mitigate them. The survey highlights that errors in AI-generated code are not limited to syntax problems; they can also affect the functional correctness, reliability, and quality of the generated software. 
+
+Another relevant contribution is provided by Liu et al. (2026), who specifically investigate hallucinations in LLM-generated code. The authors identify three primary categories and twelve specific categories of code hallucinations. These occur when generated code deviates from the user's intentions, contains internal inconsistencies, or relies on assumptions that do not correspond to real-world knowledge. This is particularly relevant to industrial control systems, where code may be syntactically valid but still contain incorrect assumptions about the physical system or its components. 
+
+Taken together, these studies demonstrate that errors in AI-generated code can occur at different levels. Some errors are relatively easy to identify through syntax checking or compilation, whereas others involve incorrect logic, missing conditions, unintended functionality, or assumptions that do not reflect the behavior of the physical system. 
+
+For our research, these findings provide a basis for selecting the types of errors to investigate in AI-generated PLC controller code. In particular, we will focus on errors that may affect the behavior of a water-tank system, such as incorrect sensor conditions, incorrect activation thresholds, missing safety conditions, and unintended control actions. We will then investigate whether digital twin models with different levels of accuracy and complexity can detect these errors reliably. 
+
+2. Our research project 
+
+2.1 Research Question 
+
+How accurate a digital twin needs to be in order to reliably detect errors or unintended behavior introduced by AI-generated control code? 
+
+2.2 Research objectives 
+
+The main objective of this research is to develop and evaluate a simulation-based testing framework using an Arduino water tank system, establishing a practical foundation for investigating digital twin fidelity and AI-assisted controller code. 
+
+The specific objectives are to: 
+
+Analyze the Arduino water tank hardware, firmware, and control behavior. 
+
+Develop a model representing the physical dynamics of the water tank. 
+
+Implement and validate a simulation of the Arduino system. 
+
+Establish a reference for expected behavior using the original Arduino controller. 
+
+Generate the controller code using AI and test it within the simulation. 
+
+Evaluate the simulation's ability to identify behavioral errors in the generated controller code. 
+
+ 
+
+2.3 Scopes and limitations 
+
+Because of the time and resources available; we will work with a basic Arduino water tank, we will create 2 models with different levels of complexity with limited variables. 
+
+The first model will only have the following variables: 
+
+Amount of water coming into the tank 
+
+Volume of water that is currently on the tank. 
+
+Amount of water coming out of the tank. 
+
+While on the second model the variables will be: 
+
+Water flow amount coming into the tank (taking the running time of the pump into consideration). 
+
+Volume of water that is currently on the tank (taking into consideration the logic behavior. E.g. The water level on the tank always has to be between X and X amount). 
+
+Water flow amount coming out of the tank (taking the running time of the pump into consideration). 
+
+Finally, we will test both models with two of the most common errors generated with the AI code.  
+
+2.4 Proof of concept 
+
+2.4.1 Model 1 | Basic water-volume model: 
+
+This model represents the tank using a simple water-balance equation: 
+
+Vt+1 = Vt + Vin – Vout 
+
+Where: 
+
+Vt: Current water volume. 
+
+Vin: Water entering during a time step. 
+
+Vout: Water leaving during a time step. 
+
+The model assumes that the water entering and leaving the tank can be represented as fixed quantities per time step. 
+
+It does not need to simulate the detailed operation of each pump. 
+
+What can it detect? 
+
+Incorrect filling behavior. 
+
+Incorrect emptying behavior. 
+
+Water volume exceeding the tank's maximum capacity. 
+
+Water volume becoming negative. 
+
+Incorrect overall water balance. 
+
+For example, if the AI-generated controller keeps the inlet pump running for too long, this model should be able to identify an overflow. 
+
+2.4.2 Model 2 | Time-dependent pump and control model:  
+
+This model considers how the pumps actually affect the tank over time. Instead of using fixed water quantities, calculate the volume transferred by each pump based on its operating time and measured flow rate. 
+
+Vt+ Δt = Vt + Σ Qin,i Δt – Σ Qout,j Δt 
+
+ 
+
+Where: 
+
+Qin,i: Flow rate of each pump contributing water to the tank. 
+
+Qout,j: Flow rate of each pump removing water from the tank. 
+
+Δt: Time during which the pumps operate. 
+
+What can it detect? 
+
+Everything the first model can detect, plus potentially: 
+
+Incorrect pump activation sequences. 
+
+Pumps running for too long or too briefly. 
+
+Unexpected interactions between multiple pumps. 
+
+Water-level overshoot caused by pump operation time. 
+
+Behavior that depends on the timing of sensor readings and controller actions. 
+
+ 
+
+3. Experiments and Results 
+
+3.1 We introduce a code with no errors and see the results on both 	models (physical and digital modules) And compare the results. 
+
+3.2.1 If they behave differently, increase the complexity of the digital twin to catch AI mismatch / errors. 
+
+ 
+
+4. Master thesis plan (what's next). 
+
+5. Conclusion 
+
+Esta peluda la cosa, fin.
