@@ -1,7 +1,7 @@
 # Atomic handoff — WP01 + WP02 (physical system and conceptual model)
 
 - Agent / model version if known: Claude Code, model `claude-opus-5-5` (Opus 5.5)
-- Status: Approved by researcher 2026-11-25 (WP01, WP02, D33). Placeholder values (D34) still proposed
+- Status: Approved by researcher 2026-11-25 (WP01, WP02, D33). Placeholder values (D34) approved as placeholders 2026-11-25
 - Scope completed: WP01 and WP02 in one session as allowed by D28. WP03 not started.
 - Created or modified paths:
   - `design/physical_system.md` (new, WP01): evidence labels; components C1–C13; system boundary; physical states and who can observe them; controller signals vs researcher observations vs simulation-only quantities; StepExample command interface and behaviour; pin/channel table; speed/direction values; actuator, sensor and safety constraints; gaps between StepExample and approved decisions; unknowns register U01–U31; visual rig checklist; D05 clarification.
@@ -15,7 +15,7 @@
   - Mermaid diagrams were **not rendered** (no Mermaid tooling installed); syntax kept to basic flowchart features. Check that they display in your viewer.
   - No hardware inspected, no runs, no measurements.
 - Addendum (same session, researcher request): placeholder values P01–P19 added as `design/physical_system.md` section 12; D34 recorded (approach approved by researcher, values proposed by agent). P11 = (P04 − P10) / P06 = 45 s checked by hand.
-- Decisions (proposed vs approved), decision IDs: D33 PROPOSED (D05 wording); D34 APPROVED approach, values PROPOSED. Uses D02, D03, D07, D18–D21, D24, D26, D27, D29, D30, D32. No approved decision changed.
+- Decisions (proposed vs approved), decision IDs: D33 PROPOSED (D05 wording); D34 APPROVED (approach and placeholder values, 2026-11-25). Uses D02, D03, D07, D18–D21, D24, D26, D27, D29, D30, D32. No approved decision changed.
 - Assumptions / changes from previous artifacts:
   - Assumed (flagged in the files): tubing, source and destination containers and a pump power supply exist; leaks, evaporation and siphoning negligible; a stopped peristaltic pump blocks flow; pumps off after `setup()`; driver channels 3–4 unused.
   - New observations from the code, not previously recorded: `kStepDone` and `kStop` stop **all** pumps; an OFF step is also rejected while a step runs and itself occupies the timer; the state report is a command record, not a measurement; stop leaves the DIR pin unchanged; PWM frequency and Arduino-core version are not set or pinned.

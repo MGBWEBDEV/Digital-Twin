@@ -37,7 +37,7 @@ Statuses: Pending / In progress / Provisional / Blocked / Ready for review / App
 
 ## Next task
 
-WP03 (paper track). Researcher: rig checklist (`design/physical_system.md` section 10) and review of placeholder values P01–P19 (D34). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
+WP03 (paper track). Researcher: rig checklist (`design/physical_system.md` section 10). Alongside: researcher wires the sensor (D19) and marks the safe limit (U26).
 
 ## Change log
 
@@ -73,3 +73,4 @@ WP03 (paper track). Researcher: rig checklist (`design/physical_system.md` secti
 - 2026-11-25: WP01 and WP02 executed together (D28) by Claude Code; `design/physical_system.md` and `design/conceptual_model.md` ready for review; D33 proposed (D05 wording). No hardware inspected, no measurements.
 - 2026-11-25: placeholder values P01–P19 added to `design/physical_system.md` section 12 at the researcher's request (D34); not for physical runs or results.
 - 2026-11-25: researcher approved WP01, WP02 and D33.
+- 2026-11-25: researcher approved placeholder values P01–P19 as they are (D34); they remain placeholders, not facts.
