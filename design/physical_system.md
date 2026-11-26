@@ -127,6 +127,16 @@ From `lib/DF4MotorDriver/df4MotorDriver.h` and `df4MotorDriver.cpp`. Numbers are
 
 Sensor pin: none in code; TBD (U15).
 
+**Sensor information, 2026-11-26 (researcher statement and manufacturer datasheet; not yet checked on the rig).** The researcher identified the sensor as the ZCT-YOF07 flexible non-contact liquid level sensor (vendor page: electropeak.com, product id 6119; datasheet "ZCT-YOF07 Non-contact flexible liquid level sensor", V1.3, linked from that page). The researcher states that pins 9 and 10 "on the controller" are open, and that the pumps are wired to a board stacked on top of the ESP32 board (a shield; make and model still to be read, U06). Because a shield connects through the stacked headers, an empty header socket does not show that the shield leaves that pin unused. From the datasheet (Confirmed only as manufacturer data):
+
+- Capacitive, non-contact. It sticks to the outside of a plastic, glass or ceramic wall with its 3M adhesive. Its parameters are factory-set, with no sensitivity adjustment. Standard sensing distances are 3, 5 or 7 mm, at most 10 mm.
+- Three wires: GND, VCC (2.5–5.0 V DC in the datasheet; the vendor page says 2.5–5.5 V), OUT. Current about 230 µA at 3.3 V.
+- **Output: LOW when liquid is detected, HIGH when there is none.** This is the opposite of placeholder P18 (HIGH = wet). The adapter setting `sensor_wet_level` is therefore expected to be 0, to be confirmed in the first sensor test (U17).
+- Level deviation ±2 mm at 19–39 °C, at most ±3 mm. Hysteresis is "±0.25 %FS", with full scale undefined. Response time is not stated (U18, measured in WP04).
+- Wiring with power on or with reversed terminals can damage it. The output's high level and driver type are not stated. Powering VCC from the board's 3.3 V supply keeps the output within the ESP32-S2's 3.3 V input range (Assumed: the output follows the supply).
+
+**Pin conflict (open).** In the firmware (`src/esp32/include/rig_config.h`, from StepExample), pin 9 is the DIR pin of channel 1 and pin 10 is the PWM pin of unused channel 3. Both are driven as outputs, and the build refuses a sensor pin equal to either. Before either can be the sensor pin: (a) confirm whether "9" and "10" are the board's GPIO numbers; (b) if pin 9 is truly unconnected, the channel 1 DIR wiring in this table is wrong and must be traced (U20); (c) using pin 10 needs a small, approved firmware change that stops driving channel 3's PWM pin.
+
 ### 6.6 Speed and direction (D20, D32)
 
 Each pump runs at one fixed speed and direction for the whole study (Approved, D20). The values actually used so far are probably those of the unmodified host script `src/driver.py` (Derived from code, assuming that script was used, D32):
@@ -194,11 +204,11 @@ These are facts about StepExample relative to approved decisions. They are input
 | U10 | Tubing lengths, inner diameter, routing, transparency | Priming volume (D24 candidate) | Rig check |
 | U11 | Whether tubes stay primed between runs | Priming effect, initial conditions | Rig check, then WP04 |
 | U12 | Water source and destination; same container or not | Initial conditions; stable supply | Rig check |
-| U13 | Sensor type and model | Behaviour, wiring | Rig check |
-| U14 | Sensor output kind (digital or analog) and supply voltage | Wiring; whether a threshold is set in firmware | Rig check |
+| U13 | Sensor type and model | Behaviour, wiring | Rig check. Partly answered 2026-11-26: ZCT-YOF07 capacitive non-contact (section 6.5) |
+| U14 | Sensor output kind (digital or analog) and supply voltage | Wiring; whether a threshold is set in firmware | Rig check. Datasheet 2026-11-26: digital high/low, 2.5–5.0 V (section 6.5) |
 | U15 | Sensor pin on the ESP32 | Firmware (WP09a) | After wiring (D19) |
 | U16 | Sensor mounting height; level as volume V_sensor | FR03, FR09 | Rig check (height), WP04 (volume) |
-| U17 | Sensor electrical polarity | Adapter normalization (D29) | After wiring, WP09a |
+| U17 | Sensor electrical polarity | Adapter normalization (D29) | After wiring, WP09a. Datasheet 2026-11-26: LOW = liquid (section 6.5); to confirm on the rig |
 | U18 | Sensor hysteresis and response time | D24 candidate effect | WP04 |
 | U19 | Visible sensor indicator (e.g. a light) | Researcher observation of the sensor | Rig check |
 | U20 | Which pump is on driver channel 1 and which on channel 2 | Correct actuator mapping | Rig check (trace wires) |
