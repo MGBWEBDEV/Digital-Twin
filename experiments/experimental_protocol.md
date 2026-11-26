@@ -177,7 +177,7 @@ Here C is the measured capacity (P01), V_ro is the WP04 run-on volume (0 if E2 i
 
 With the single 45 s placeholder (P11), the S3 row would reach 30 + 45 = 75 mL, which is more than a 60 mL syringe holds. With the 45 s limit, a correct FR09 48 mL run also hits the cut-off in Model 2 (M2-8). This is why the limit depends on the start volume.
 
-**Consequences after approval.** WP09a needs a "set limit" command and a compiled-in ceiling (open). WP10/WP12 follow-up done 2026-11-26: the simulation environment takes T_max per run (`shared.cutoff.t_max_ms`), `run.json` records `t_max_s` and its inputs, the evaluator recomputes it independently, and M1-12, M2-8 and M2-9 were recomputed by hand (`design/mathematical_models.md` section 9). P11 is no longer used.
+**Consequences after approval.** WP09a needs a "set limit" command and a compiled-in ceiling: implemented 2026-11-26 (`src/esp32/`, `src/shared/rig_environment.py`; approved 2026-11-26, D49; not compiled for the board, not uploaded). WP10/WP12 follow-up done 2026-11-26: the simulation environment takes T_max per run (`shared.cutoff.t_max_ms`), `run.json` records `t_max_s` and its inputs, the evaluator recomputes it independently, and M1-12, M2-8 and M2-9 were recomputed by hand (`design/mathematical_models.md` section 9). P11 is no longer used.
 
 ## 9. Calibration and held-out data
 
@@ -328,7 +328,7 @@ Natural and injected results are always reported separately.
 
 - **Run directories.** `experiments/logs/<run_id>/` with the files of `design/software_architecture.md` section 7 and the key names of `src/testing/README.md` (D41 (6)). `run.json` additionally records `purpose`, the per-run `t_max_s`, the controller generation ID and the planned V0 (for paired runs, the measured rig V0).
 - **Run ID.** As the runner already writes it: `<UTC yyyymmddThhmmssZ>_<environment>_<scenario run>_<first 8 hex of controller SHA-256>`, for example `20261210T101500Z_rig_S2_1a2b3c4d`. Repeats differ by timestamp.
-- **Manual readings.** For rig runs, the harness creates `manual.csv` with empty `start` and `end` rows. The researcher fills them in during the run, from the syringe, with their uncertainty, before the next run starts. Raw files are never edited afterwards. A wrongly entered reading makes the run invalid; the reason is noted and the run is repeated.
+- **Manual readings.** (Status 2026-11-26, D49 (5), approved: `shared.run_rig` asks for the start reading before the run and the end and peak readings after settling, and writes `manual.csv` itself. This replaces the empty rows described next.) For rig runs, the harness creates `manual.csv` with empty `start` and `end` rows. The researcher fills them in during the run, from the syringe, with their uncertainty, before the next run starts. Raw files are never edited afterwards. A wrongly entered reading makes the run invalid; the reason is noted and the run is repeated.
 - **Session log.** `experiments/logs/sessions/<date>.md`: approved session plan, approvals, firmware and harness versions, rig inspection, stops, anomalies, and deviations from this protocol.
 - **Units.** Time in integer ms in files, s at the controller interface; volume in mL; booleans as 0/1 or true/false.
 - **Storage.** Run directories, session logs, generation records and controller files are committed to Git after each session (D11, D17). Calibration data from WP04 goes to `experiments/data/`.
@@ -348,8 +348,8 @@ Natural and injected results are always reported separately.
 | All final numerical values | WP04, rig check | 3, 8 |
 | Reset method and R13 | Rig check (U10, U11), WP04 | 6.2 |
 | Model 2 effects included | WP04 (D24), WP11 | 5, 10 |
-| Rig support for per-run T_max (simulation side done 2026-11-26) | WP09a | 8, 10 |
-| Firmware "set limit" command and ceiling | WP09a | 8 |
+| Rig support for per-run T_max (simulation side done 2026-11-26) | WP09a: implemented 2026-11-26, approved 2026-11-26 (D49), not uploaded | 8, 10 |
+| Firmware "set limit" command and ceiling | WP09a: implemented 2026-11-26, approved 2026-11-26 (D49), not uploaded | 8 |
 | Generation pool G01–G10 | Researcher sessions in ChatGPT | 13 |
 | Outtake (wrong-actuator) runs on the rig | U30 | 15 |
 | Final version of this protocol | WP04 | — |

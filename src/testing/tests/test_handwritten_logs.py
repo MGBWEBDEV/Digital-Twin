@@ -359,6 +359,16 @@ class TestInvalidRuns(HandCase):
         v = self.evaluate("S1-10", calls, truth, scenario_id="S9")
         self.assertInvalid(v, "unknown scenario")
 
+    def test_rig_start_reading_outside_band(self):
+        # D46 (1): planned V0 5 mL, R14 = 1 mL; 6.0 is inside, 6.5 outside.
+        calls = hand_calls([(0, 19_000)], wet_from_ms=19_000)
+        v = self.evaluate("S2", calls, environment="rig", manual={"start": 6.0, "end": 25.0})
+        self.assertNotEqual(v["overall"], "invalid")
+        v = self.evaluate("S2", calls, environment="rig", manual={"start": 6.5, "end": 25.5})
+        self.assertInvalid(v, "outside planned V0")
+        v = self.evaluate("S2", calls, environment="rig", manual={"start": 3.9, "end": 22.9})
+        self.assertInvalid(v, "outside planned V0")
+
     def test_fr01_precondition_on_rig(self):
         # V0 + Q_in * T_fill must be <= 50 - 2 mL: 39 + 10 = 49 > 48.
         v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), environment="rig",

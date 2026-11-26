@@ -21,7 +21,9 @@ Run purposes (`experiments/experimental_protocol.md` section 4): only
 reference, fault, pool and paired runs are scored; pool verdicts are marked
 exploratory. A paired run may start from the measured rig V0 within the
 planned V0 +/- R14 (D46). The recorded per-run cut-off `t_max_s` must equal
-the evaluator's own D45 calculation from the planned V0.
+the evaluator's own D45 calculation from the planned V0. On the rig, the
+settled start reading in manual.csv must lie within the planned V0 +/- R14
+(D46 (1); version 0.5.0).
 
 Usage: PYTHONPATH=src python3 -m testing.evaluator <run_dir> [<run_dir> ...]
 writes <run_dir>/verdict.json and prints the overall verdict.
@@ -37,7 +39,7 @@ from testing import parameters as parameters_module
 from testing.runfiles import RunFileError, read_run
 from testing.scenarios import SCENARIO_RUNS
 
-EVALUATOR_VERSION = "0.4.0"
+EVALUATOR_VERSION = "0.5.0"
 
 PASS = "pass"
 FAIL = "fail"
@@ -512,6 +514,12 @@ def evaluate_files(files, params=None, scenarios=None):
         if obs["v0"] + p["P06"] * case.parameter > p["P04"] - p["R05"] + VOLUME_EPS_ML:
             problems.append("FR01 precondition V0 + Q_in * T_fill <= safe mark - eps_V "
                             "not met")
+    # D46 (1): a rig run may start only if the settled start reading lies within
+    # the planned V0 +/- R14; a reading outside the band is a setup error.
+    if files.run["environment"] == "rig" and obs["v0"] is not None:
+        if abs(obs["v0"] - case.v0_ml) > p["R14"] + VOLUME_EPS_ML:
+            problems.append(f"rig start reading {fmt_ml(obs['v0'])} outside planned V0 "
+                            f"{fmt_ml(case.v0_ml)} +/- R14 {fmt_ml(p['R14'])} (D46 (1))")
     if problems:
         return dict(verdict, overall="invalid", invalid_reasons=problems, checks=[])
 

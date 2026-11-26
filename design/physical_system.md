@@ -214,6 +214,11 @@ These are facts about StepExample relative to approved decisions. They are input
 | U30 | Effects of running a pump dry or the outtake on an empty syringe | Safe operating limits | Pump documentation (U07); avoid until known |
 | U31 | Host–ESP32 command and report latency | Rig response timing (D21) | WP04 |
 
+Status note 2026-11-26 (WP09a, Claude Code; from code and library sources, not measured on the rig):
+- **U24:** toolchain pinned to `espressif32@6.9.0`, Arduino-ESP32 core 2.0.17 (researcher decision, D49 (8)). In that core, `analogWrite` uses a default PWM frequency of 1000 Hz. A duty of 4095 at 12 bits is turned into full ON by `ledcWrite`. StepExample's 4096 is passed to the hardware unchanged. The rig's current build version is still unknown.
+- **U28:** the WP09a firmware switches all driver outputs OFF as the first step of `setup()`. Pin levels before `setup()` depend on the hardware and remain open.
+- **P16:** the WP09a host adapter logs integer milliseconds from the host's monotonic clock, so the host log resolution is 1 ms.
+
 ## 10. Rig checklist for the researcher
 
 Visual checks only; no powered run is needed. Results go into this file (replace TBD) and, where a decision is affected, into `context/decisions.md`.

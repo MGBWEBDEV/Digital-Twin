@@ -281,9 +281,11 @@ experiments/logs/<run_id>/   run files (section 7)
 
 Independent ON/OFF per pump; sensor reported on change and on request; cut-off with D38 semantics and an event message; start-up message detected by the adapter, which then sets `run_valid = False` (WP06 X8); fixed speed and direction set once (P19), not per command; host timestamps on every send and receive. The protocol (extend StepExample's commands or define new ones) remains open under D16.
 
+Status 2026-11-26 (WP09a, approved 2026-11-26, D49): implemented in `src/esp32/` (firmware, not compiled for the board, not uploaded) and `src/shared/rig_protocol.py`, `rig_environment.py`, `run_rig.py` (host adapter and rig runner). The protocol replaces StepExample's timed `kStep` with a per-run limit command and a compiled-in ceiling (D45); message table in `src/esp32/README.md`.
+
 ## 13. Open points
 
 - WP05: section 8 revised after provisional WP05 (2026-11-25); revisit after final WP05 (WP04 values, included effects).
 - WP08: prompt wording of the task labels; cut-off margin; final R/P values.
-- WP09a: protocol (D16); how the adapter normalizes the sensor once U14/U17 are known.
+- WP09a: protocol (D16; proposed in D49); how the adapter normalizes the sensor once U14/U17 are known (adapter setting `sensor_wet_level`, from the rig check).
 - Run ID scheme and how manual readings are entered (form or hand-edited CSV): decide in WP08.

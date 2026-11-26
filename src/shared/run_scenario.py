@@ -180,6 +180,22 @@ def provenance():
             "harness_version": HARNESS_VERSION}
 
 
+CONTROLLERS_DIR = os.path.join(REPO, "src", "shared", "controllers")
+
+
+def generation_id(controller_path):
+    """Generation ID of a controller file (protocol sections 13.3, 15.4, 16).
+
+    Generated and injected controllers live in src/shared/controllers/ as
+    Gnn.py or <ref>_inj-<code>.py; the ID is the file name without `.py`.
+    Any other file (test doubles) has no generation ID: None.
+    """
+    path = os.path.abspath(controller_path)
+    if os.path.dirname(path) != CONTROLLERS_DIR:
+        return None
+    return os.path.splitext(os.path.basename(path))[0]
+
+
 def _relative(path):
     path = os.path.abspath(path)
     return os.path.relpath(path, REPO) if path.startswith(REPO + os.sep) else path
@@ -225,6 +241,7 @@ def run_case(controller_path, case_id, out_dir, environment="model_1", run_id=No
         "date_utc": now.isoformat(timespec="seconds"),
         **provenance(),
         "controller": {"file": _relative(controller_path), "sha256": check.sha256,
+                       "generation_id": generation_id(controller_path),
                        "rule_check": check.as_dict()},
         "environment": environment,
         "model": env_info,

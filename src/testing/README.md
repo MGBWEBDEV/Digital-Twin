@@ -1,6 +1,6 @@
 # Evaluator (WP12, test-first part)
 
-> Status: approved by researcher 2026-11-25 (Claude Code). Provisional: all parameter values are placeholders (D34). Evaluator conventions: D41 (approved). Version 0.4.0 (2026-11-26, D45/D46 follow-up: `purpose`, `v0_ml`, `t_max_s`; D48 approved by researcher 2026-11-26).
+> Status: approved by researcher 2026-11-25 (Claude Code). Provisional: all parameter values are placeholders (D34). Evaluator conventions: D41 (approved). Version 0.4.0 (2026-11-26, D45/D46 follow-up: `purpose`, `v0_ml`, `t_max_s`; D48 approved by researcher 2026-11-26). Version 0.5.0 (2026-11-26, approved by researcher 2026-11-26): a rig run whose settled start reading in `manual.csv` lies outside the planned V0 ± R14 is invalid (D46 (1)).
 
 Judges one finished run from its run files against the WP03 checks (`design/functional_requirements.md` section 5) and infers the WP06 end state (`design/controller_behavior.md` section 6). Standard library only; imports no controller and no model package.
 
