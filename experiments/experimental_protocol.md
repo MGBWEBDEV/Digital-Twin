@@ -177,7 +177,7 @@ Here C is the measured capacity (P01), V_ro is the WP04 run-on volume (0 if E2 i
 
 With the single 45 s placeholder (P11), the S3 row would reach 30 + 45 = 75 mL, which is more than a 60 mL syringe holds. With the 45 s limit, a correct FR09 48 mL run also hits the cut-off in Model 2 (M2-8). This is why the limit depends on the start volume.
 
-**Consequences after approval.** The code currently uses one P11 value. WP09a needs a "set limit" command and a compiled-in ceiling. WP10/WP12 need the environment to take T_max per run, `run.json` to record it, and M1-12, M2-8 and M2-9 to be recomputed. Not done here; WP08 changes no code.
+**Consequences after approval.** WP09a needs a "set limit" command and a compiled-in ceiling (open). WP10/WP12 follow-up done 2026-11-26: the simulation environment takes T_max per run (`shared.cutoff.t_max_ms`), `run.json` records `t_max_s` and its inputs, the evaluator recomputes it independently, and M1-12, M2-8 and M2-9 were recomputed by hand (`design/mathematical_models.md` section 9). P11 is no longer used.
 
 ## 9. Calibration and held-out data
 
@@ -189,7 +189,7 @@ With the single 45 s placeholder (P11), the S3 row would reach 30 + 45 = 75 mL, 
 ## 10. Simulation runs
 
 - **Nominal runs.** Each controller is run on the ten scenario runs at their nominal start volumes, in Model 1 and Model 2. This is done once, because the runs are deterministic (D27).
-- **Paired runs** (D46). Each scored rig run gets a paired run in each model, with the start volume set to the measured rig V0 rounded to the graduation. All other inputs are the same: controller, request, override and T_max. The D25 comparison (section 12) uses the paired runs. Nominal and paired verdicts are both reported; if they differ, this is noted. WP12 follow-up: the scenario runner needs a per-run start-volume input recorded in `run.json`, with D41 (5) checking against it.
+- **Paired runs** (D46). Each scored rig run gets a paired run in each model, with the start volume set to the measured rig V0 rounded to the graduation. All other inputs are the same: controller, request, override and T_max. The D25 comparison (section 12) uses the paired runs. Nominal and paired verdicts are both reported; if they differ, this is noted. Done 2026-11-26 (WP12 follow-up): the runner takes `--purpose paired --v0-ml <rig V0> --paired-with <rig run ID>`, refuses a V0 outside the planned V0 ± R14, and records `v0_ml`, `v0_plan_ml` and `paired_with` in `run.json`; the evaluator checks the model start volume against `v0_ml` (D41 (5)).
 - The determinism replay (D42 (3)) runs for every scored run in every environment.
 
 ## 11. Repetitions and the near-limit rule (D27, D47)
@@ -348,7 +348,7 @@ Natural and injected results are always reported separately.
 | All final numerical values | WP04, rig check | 3, 8 |
 | Reset method and R13 | Rig check (U10, U11), WP04 | 6.2 |
 | Model 2 effects included | WP04 (D24), WP11 | 5, 10 |
-| Code support for per-run T_max and paired start volume | WP09a, WP10/WP12 follow-up | 8, 10 |
+| Rig support for per-run T_max (simulation side done 2026-11-26) | WP09a | 8, 10 |
 | Firmware "set limit" command and ceiling | WP09a | 8 |
 | Generation pool G01–G10 | Researcher sessions in ChatGPT | 13 |
 | Outtake (wrong-actuator) runs on the rig | U30 | 15 |

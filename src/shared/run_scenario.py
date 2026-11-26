@@ -9,6 +9,10 @@ Steps for one run:
    planned parameter set (`testing.parameters`, placeholders, D34). The
    environment's own parameter values must agree with the plan for every ID
    both define; otherwise the run is refused (a setup error, not a verdict).
+   The cut-off limit T_max is computed per run from the PLANNED start volume
+   (D45); a paired run starts from the measured rig V0 but keeps the T_max
+   of the planned V0 (D46 (3)). Every run records its purpose
+   (`experiments/experimental_protocol.md` section 4).
 3. Fresh module load and controller instance (D36); harness call loop (D38).
 4. Determinism replay on a second instance (D37).
 5. run.json, calls.csv, events.csv, truth.csv written once.
@@ -18,7 +22,10 @@ in through ENVIRONMENTS.
 
 Usage (from the repository root):
     PYTHONPATH=src python3 -m shared.run_scenario --controller FILE \
-        --case S2 [--case S4 ... | --all] --out experiments/logs
+        --purpose reference --case S2 [--case S4 ... | --all] --out experiments/logs
+    # paired run (D46 (3)): one case, measured rig V0, the rig run it pairs with
+    PYTHONPATH=src python3 -m shared.run_scenario --controller FILE \
+        --purpose paired --case S2 --v0-ml 5.5 --paired-with RIG_RUN_ID --out experiments/logs
 """
 
 import argparse
@@ -30,6 +37,7 @@ import sys
 
 from shared import harness
 from shared.controller_check import check_file, load_controller_class
+from shared.cutoff import t_max_ms
 from shared.run_files import write_run_files
 from shared.simulation_environment import SimulationEnvironment
 
@@ -39,6 +47,22 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 
 class ConfigurationError(Exception):
     """The run setup is inconsistent; nothing was run."""
+
+
+# Run purposes and their environments (experiments/experimental_protocol.md
+# section 4). `verification` runs are unit tests; `cutoff_check` and
+# `calibration` are rig-only. This runner drives simulations, so it accepts
+# only the scored simulation purposes.
+PURPOSES = {
+    "verification": ("model_1", "model_2"),
+    "cutoff_check": ("rig",),
+    "calibration": ("rig",),
+    "reference": ("rig", "model_1", "model_2"),
+    "fault": ("rig", "model_1", "model_2"),
+    "pool": ("model_1", "model_2"),
+    "paired": ("model_1", "model_2"),
+}
+RUNNER_PURPOSES = ("reference", "fault", "pool", "paired")
 
 
 # ---------------------------------------------------------------------------
@@ -54,7 +78,7 @@ def model_1_environment():
     by_id = {
         "P01": mp.capacity_ml, "P05": mp.sensor_level_ml, "P06": mp.q_in_ml_per_s,
         "P07": mp.q_out_ml_per_s, "P09": mp.dead_volume_ml,
-        "P11": sp.max_on_ms / 1000, "R09": sp.settle_ms / 1000,
+        "R09": sp.settle_ms / 1000,
     }
     info = {"name": "model_1", "version": "WP10 provisional (placeholders, D34)",
             "dt_sim_ms": sp.step_ms, "settle_ms": sp.settle_ms,
@@ -74,14 +98,55 @@ def ms(seconds):
     return int(round(seconds * 1000))
 
 
-def plan_for_case(case, p):
-    """RunPlan from a scenario run case and the planned parameter values {ID: value}."""
+def t_max_inputs(case, p):
+    """Inputs of the D45 rule for this case: planned V0 and the planned values."""
+    return {"capacity_ml": p["P01"], "headroom_ml": p["R12"], "v0_plan_ml": case.v0_ml,
+            "v0_band_ml": p["R14"], "run_on_ml": p["P13"],
+            "q_in_hi_ml_per_s": p["Q_in,hi"]}
+
+
+def planned_t_max_ms(case, p):
+    """Per-run cut-off T_max (D45) from the scenario's PLANNED start volume."""
+    try:
+        return t_max_ms(**t_max_inputs(case, p))
+    except ValueError as exc:
+        raise ConfigurationError(f"{case.run_case}: {exc}") from None
+
+
+def plan_for_case(case, p, v0_ml=None):
+    """RunPlan from a scenario run case and the planned parameter values {ID: value}.
+
+    v0_ml: start volume for a paired run (measured rig V0, D46 (3)); None
+    means the scenario V0. T_max always comes from the scenario V0.
+    """
     request = harness.Request(task=case.task, parameter=case.parameter,
                               v_sensor_ml=p["P05"], q_in_ml_per_s=p["P06"],
                               t_deadline_s=p["R06"])
-    return harness.RunPlan(scenario_id=case.run_case, v0_ml=case.v0_ml, request=request,
-                           sensor_override=case.sensor_override,
-                           dt_call_ms=ms(p["R01"]), t_end_ms=ms(p["R08"]))
+    return harness.RunPlan(scenario_id=case.run_case,
+                           v0_ml=case.v0_ml if v0_ml is None else v0_ml,
+                           request=request, sensor_override=case.sensor_override,
+                           dt_call_ms=ms(p["R01"]), t_end_ms=ms(p["R08"]),
+                           t_max_ms=planned_t_max_ms(case, p))
+
+
+def check_purpose(purpose, environment, case, p, v0_ml, paired_with):
+    """Refuse a purpose this runner cannot serve and inconsistent paired inputs."""
+    if purpose not in PURPOSES:
+        raise ConfigurationError(f"unknown purpose {purpose!r}")
+    if purpose not in RUNNER_PURPOSES or environment not in PURPOSES[purpose]:
+        raise ConfigurationError(f"purpose {purpose!r} is not a scored run of "
+                                 f"environment {environment!r} (protocol section 4)")
+    if purpose != "paired":
+        if v0_ml is not None or paired_with is not None:
+            raise ConfigurationError("a start volume or paired run ID is given only "
+                                     "for purpose 'paired'")
+        return
+    if v0_ml is None or not paired_with:
+        raise ConfigurationError("a paired run needs the measured rig V0 (v0_ml) and "
+                                 "the rig run ID (paired_with)")
+    if abs(float(v0_ml) - float(case.v0_ml)) > float(p["R14"]) + 1e-9:
+        raise ConfigurationError(f"paired V0 {v0_ml} mL is outside the planned "
+                                 f"{case.v0_ml} +/- R14 = {p['R14']} mL (D46 (1))")
 
 
 def merged_parameters(plan_values, env_values):
@@ -125,8 +190,13 @@ def _relative(path):
 # ---------------------------------------------------------------------------
 
 def run_case(controller_path, case_id, out_dir, environment="model_1", run_id=None,
-             scenarios=None, plan_values=None):
-    """Run one scenario case; write its run directory under out_dir; return its path."""
+             scenarios=None, plan_values=None, *, purpose, v0_ml=None, paired_with=None):
+    """Run one scenario case; write its run directory under out_dir; return its path.
+
+    purpose: run purpose (protocol section 4); this runner accepts
+    RUNNER_PURPOSES. For purpose "paired", v0_ml is the measured rig start
+    volume (within the planned V0 +/- R14) and paired_with the rig run ID.
+    """
     from testing.parameters import values
     from testing.scenarios import SCENARIO_RUNS
 
@@ -137,11 +207,12 @@ def run_case(controller_path, case_id, out_dir, environment="model_1", run_id=No
     if environment not in ENVIRONMENTS:
         raise ConfigurationError(f"unknown environment {environment!r}")
     case = scenarios[case_id]
+    check_purpose(purpose, environment, case, plan_values, v0_ml, paired_with)
 
     check = check_file(controller_path)
     env, env_values, env_info = ENVIRONMENTS[environment]()
     parameters = merged_parameters(plan_values, env_values)
-    plan = plan_for_case(case, plan_values)
+    plan = plan_for_case(case, plan_values, v0_ml)
 
     now = datetime.datetime.now(datetime.timezone.utc)
     run_id = run_id or f"{now:%Y%m%dT%H%M%SZ}_{environment}_{case_id}_{check.sha256[:8]}"
@@ -158,7 +229,13 @@ def run_case(controller_path, case_id, out_dir, environment="model_1", run_id=No
         "environment": environment,
         "model": env_info,
         "scenario_id": case_id,
-        "v0_ml": case.v0_ml,
+        "purpose": purpose,
+        "paired_with": paired_with,
+        "v0_plan_ml": case.v0_ml,
+        "v0_ml": plan.v0_ml,                 # start volume given to the environment
+        "t_max_s": plan.t_max_ms / 1000,     # per-run cut-off (D45)
+        "t_max_rule": {"rule": "D45, protocol section 8",
+                       "inputs": t_max_inputs(case, plan_values)},
         "sensor_override": case.sensor_override,
         "request": plan.request.as_dict(),
         "parameters": parameters,
@@ -198,6 +275,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--controller", required=True, help="controller file (D37)")
     parser.add_argument("--environment", default="model_1", choices=sorted(ENVIRONMENTS))
+    parser.add_argument("--purpose", required=True, choices=RUNNER_PURPOSES,
+                        help="run purpose (protocol section 4)")
+    parser.add_argument("--v0-ml", type=float, default=None,
+                        help="paired runs only: measured rig start volume (D46 (3))")
+    parser.add_argument("--paired-with", default=None,
+                        help="paired runs only: run ID of the rig run")
     parser.add_argument("--case", action="append", default=[], help="scenario run case")
     parser.add_argument("--all", action="store_true", help="all ten scenario run cases")
     parser.add_argument("--out", required=True, help="parent directory for run directories")
@@ -205,8 +288,12 @@ def main(argv=None):
     cases = list(SCENARIO_RUNS) if args.all else args.case
     if not cases:
         parser.error("give --case or --all")
+    if args.purpose == "paired" and len(cases) != 1:
+        parser.error("a paired run takes exactly one --case")
     for case_id in cases:
-        print(run_case(args.controller, case_id, args.out, args.environment))
+        print(run_case(args.controller, case_id, args.out, args.environment,
+                       purpose=args.purpose, v0_ml=args.v0_ml,
+                       paired_with=args.paired_with))
     return 0
 
 

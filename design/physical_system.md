@@ -252,7 +252,7 @@ At the researcher's request (2026-11-25), the unknowns needed by later design an
 | P08 | Run-to-run spread of delivered volume | ±0.5 | mL | Same as P03 | U09 | WP04 |
 | P09 | Dead volume the outtake cannot remove | 0 | mL | Ignored until known | U05 | Rig check |
 | P10 | Standard starting volume | 5 | mL | Well below P05 | — | WP08 |
-| P11 | Firmware maximum ON time (simulation only) | 45 | s | (P04 − P10) / P06, per the D27 rule, using the safe mark instead of capacity for extra margin | — | WP04 calibration (D27) |
+| P11 | Firmware maximum ON time (simulation only). **Superseded by D45**: replaced by the per-run T_max of `experiments/experimental_protocol.md` section 8; no longer used by code | 45 | s | (P04 − P10) / P06, per the D27 rule, using the safe mark instead of capacity for extra margin | — | WP04 calibration (D27) |
 | P12 | Tube priming delay (Model 2 candidate) | 2 | s | Round value | U10, U11 | WP04 (D24 inclusion rule) |
 | P13 | Run-on volume after OFF (Model 2 candidate) | 0.5 | mL | Round value | — | WP04 (D24) |
 | P14 | Sensor response delay (Model 2 candidate) | 0.1 | s | Round value | U18 | WP04 (D24) |

@@ -100,16 +100,16 @@ class TestCorrectBehaviourOracles(OracleCase):
 class TestFaultyBehaviourOracles(OracleCase):
 
     def test_s2_intake_never_switched_off(self):
-        """WP03 section 9, last row: cut-off at 45 s; V_end = 50 mL = safe mark;
-        FR03-L2 and FR08-L4 fail; FR08-P1 passes exactly at the limit."""
+        """WP03 section 9, last row, recomputed for D45: cut-off at 48.5 s;
+        V_end = 53.5 mL, above the safe mark; FR03-L2, FR08-L4 and FR08-P1 fail."""
         v = self.run_schedule("S2", [(0, None)])
         res = self.results(v)
         self.assertEqual(v["overall"], "fail")
         self.assertEqual(res["FR03-L2"], "fail")
         self.assertEqual(res["FR08-L4"], "fail")
-        self.assertEqual(res["FR08-P1"], "pass")
-        self.assertEqual(v["observations"]["cutoff_events_ms"], [45_000])
-        self.assertAlmostEqual(v["observations"]["v_end_ml"], 50.0)
+        self.assertEqual(res["FR08-P1"], "fail")
+        self.assertEqual(v["observations"]["cutoff_events_ms"], [48_500])
+        self.assertAlmostEqual(v["observations"]["v_end_ml"], 53.5)
         self.assertEqual(v["inferred_end_state"], "NOT_STOPPED")
 
     def test_s2_late_stop_fails_response(self):
@@ -130,8 +130,8 @@ class TestFaultyBehaviourOracles(OracleCase):
         res = self.results(v)
         self.assertEqual(res["FR08-L2"], "fail")
         self.assertEqual(res["FR08-L4"], "fail")
-        self.assertEqual(res["FR08-P1"], "pass")       # 50 mL, exactly at the mark
-        self.assertAlmostEqual(v["observations"]["v_end_ml"], 50.0)
+        self.assertEqual(res["FR08-P1"], "fail")       # cut-off 48.5 s: 53.5 mL (D45)
+        self.assertAlmostEqual(v["observations"]["v_end_ml"], 53.5)
 
     def test_s4_pulsing_while_waiting(self):
         # D41: FR03-L1 is also scored in S4, so a restart while waiting is caught.
@@ -154,7 +154,7 @@ class TestFaultyBehaviourOracles(OracleCase):
         self.assertEqual(res["FR09-L2"], "fail")
         self.assertEqual(res["FR09-P1"], "fail")
         self.assertEqual(res["FR08-L4"], "fail")
-        self.assertAlmostEqual(v["observations"]["v_end_ml"], 50.0)
+        self.assertAlmostEqual(v["observations"]["v_end_ml"], 53.5)   # cut-off 48.5 s
 
 
 if __name__ == "__main__":

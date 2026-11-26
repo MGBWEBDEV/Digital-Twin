@@ -160,8 +160,8 @@ def read_run(run_dir):
             run = json.load(fh)
         except json.JSONDecodeError as exc:
             raise RunFileError(f"{run_path}: {exc}") from None
-    for key in ("run_id", "environment", "scenario_id", "request",
-                "parameters", "dt_call_ms", "end_reason"):
+    for key in ("run_id", "environment", "scenario_id", "purpose", "v0_ml", "t_max_s",
+                "request", "parameters", "dt_call_ms", "end_reason"):
         if key not in run:
             raise RunFileError(f"{run_path}: missing key {key!r}")
 

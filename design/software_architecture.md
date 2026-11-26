@@ -158,7 +158,7 @@ flowchart LR
 
 The order mirrors the rig: serial link → firmware (where the cut-off lives) → pump → water → sensor → firmware → serial link (WP02 section 5.3). Delays and the cut-off are shared code; the TankSystem is the only model-specific part.
 
-**Cut-off semantics (identical in firmware and simulation, D38).** For each pump, the cut-off measures continuous ON time from the moment the ON command reaches it. When it reaches the maximum ON time (P11, placeholder; final value from WP04 with margin, see WP03 finding), the pump is forced OFF and a `cutoff` event is logged. The pump stays OFF while the commanded state is still ON; a new ON edge (OFF then ON) starts a new timer. The controller is not informed (WP06 X6).
+**Cut-off semantics (identical in firmware and simulation, D38).** For each pump, the cut-off measures continuous ON time from the moment the ON command reaches it. When it reaches the maximum ON time (set per run from the planned start volume, D45, `experiments/experimental_protocol.md` section 8; formerly the single placeholder P11), the pump is forced OFF and a `cutoff` event is logged. The pump stays OFF while the commanded state is still ON; a new ON edge (OFF then ON) starts a new timer. The controller is not informed (WP06 X6).
 
 ## 7. Run files (D11)
 
@@ -166,7 +166,7 @@ One directory per run: `experiments/logs/<run_id>/`. Raw files are never edited 
 
 | File | Written by | Content | Environments |
 |---|---|---|---|
-| `run.json` | Harness | Run ID, date, git commit, controller file and SHA-256, environment and model version, all parameter values with their P/R IDs, scenario ID, Δt_c, Δt_s, end reason (normal, invalid) | All |
+| `run.json` | Harness | Run ID, date, git commit, controller file and SHA-256, environment and model version, all parameter values with their P/R IDs, scenario ID, Δt_c, Δt_s, end reason (normal, invalid); run purpose, planned and actual start volume, paired rig run ID and per-run T_max with its inputs (D45, D46) | All |
 | `calls.csv` | Harness | `t_ms, sensor_env, sensor_given, intake, outtake` (one row per call) | All |
 | `events.csv` | Environment | `t_ms, source, event, detail`: command sent/acknowledged, sensor edge reported, cut-off, firmware start-up, late call, run invalidated | All |
 | `truth.csv` | Simulation environment | `t_ms, volume_ml, intake_flowing, outtake_flowing, overflow, spill_ml, shortfall_ml` and, in Model 2, `tube_fill_ml` (per simulation step or decimated; WP05 section 4.8); never read by the controller or harness | Models only |

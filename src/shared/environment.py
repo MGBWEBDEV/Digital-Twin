@@ -17,12 +17,15 @@ class InitialConditions:
     `start` only reads `v0_ml`.
 
     v0_ml: settled start volume V0 (P10 by default in scenarios; WP03 section 8).
+    t_max_ms: per-run cut-off maximum continuous ON time (D45), computed from
+        the PLANNED start volume (shared.cutoff.t_max_ms).
 
     The intake tube is always empty at the start of a run (researcher,
     2026-11-25; D40): there is no tube-fill input.
     """
 
     v0_ml: float
+    t_max_ms: int
 
 
 class Environment(ABC):
@@ -32,7 +35,7 @@ class Environment(ABC):
 
     @abstractmethod
     def start(self, scenario) -> None:
-        """Set up V0, both pumps OFF, clock at t = 0."""
+        """Set up V0 and the per-run cut-off (D45), both pumps OFF, clock at t = 0."""
 
     @abstractmethod
     def now_ms(self) -> int:

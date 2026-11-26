@@ -228,7 +228,7 @@ class TestRunFiles(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_files_and_keys(self):
-        run_dir = run_case(FILL_UNTIL_WET, "S2", self.out, run_id="r1")
+        run_dir = run_case(FILL_UNTIL_WET, "S2", self.out, run_id="r1", purpose="reference")
         self.assertEqual(sorted(os.listdir(run_dir)),
                          ["calls.csv", "events.csv", "run.json", "truth.csv"])
         with open(os.path.join(run_dir, "run.json"), encoding="utf-8") as fh:
@@ -246,8 +246,15 @@ class TestRunFiles(unittest.TestCase):
                          {"checked": True, "identical": True, "first_difference": None})
         for pid, value in values().items():
             self.assertEqual(run["parameters"][pid], value)
-        self.assertEqual(run["parameters"]["P11"], 45.0)
+        self.assertNotIn("P11", run["parameters"])                    # replaced by D45
         self.assertEqual(run["parameters"]["P01"], 60.0)
+        self.assertEqual(run["purpose"], "reference")
+        self.assertIsNone(run["paired_with"])
+        self.assertEqual((run["v0_plan_ml"], run["v0_ml"]), (5.0, 5.0))
+        self.assertEqual(run["t_max_s"], 48.5)                        # D45, V0_plan = 5 mL
+        self.assertEqual(run["t_max_rule"]["inputs"],
+                         {"capacity_ml": 60.0, "headroom_ml": 5.0, "v0_plan_ml": 5.0,
+                          "v0_band_ml": 1.0, "run_on_ml": 0.5, "q_in_hi_ml_per_s": 1.0})
 
         calls = read_csv(os.path.join(run_dir, "calls.csv"))
         self.assertEqual(len(calls), 601)
@@ -270,17 +277,82 @@ class TestRunFiles(unittest.TestCase):
         times = [int(e["t_ms"]) for e in events]
         self.assertEqual(times, sorted(times))
 
+    def read_run(self, run_dir):
+        with open(os.path.join(run_dir, "run.json"), encoding="utf-8") as fh:
+            return json.load(fh)
+
+    def test_t_max_follows_planned_start_volume(self):
+        # D45: S3 starts at 30 mL, so T_max = 23.5 s (hand calculation,
+        # protocol section 8); the environment logs the limit it was given.
+        run_dir = run_case(FILL_UNTIL_WET, "S3-FR03", self.out, run_id="s3",
+                           purpose="reference")
+        self.assertEqual(self.read_run(run_dir)["t_max_s"], 23.5)
+        start = read_csv(os.path.join(run_dir, "events.csv"))[0]
+        self.assertEqual(start["event"], "start")
+        self.assertIn("t_max_ms=23500", start["detail"])
+
+    def test_never_off_double_stopped_by_per_run_limit(self):
+        # M1-12 recomputed for D45: cut-off at 48.5 s, V_end = 53.5 mL.
+        path = write_schedule_double(self.out, "never_off", 0.0, None)
+        run_dir = run_case(path, "S2", self.out, run_id="never", purpose="fault")
+        events = read_csv(os.path.join(run_dir, "events.csv"))
+        self.assertEqual([(e["t_ms"], e["detail"]) for e in events if e["event"] == "cutoff"],
+                         [("48500", "pump=intake")])
+        truth = read_csv(os.path.join(run_dir, "truth.csv"))
+        self.assertEqual(float(truth[-1]["volume_ml"]), 53.5)
+
+    def test_paired_run_uses_measured_v0_and_planned_t_max(self):
+        # D46 (3) example: S2 on the rig started at 5.5 mL.
+        run_dir = run_case(FILL_UNTIL_WET, "S2", self.out, run_id="p", purpose="paired",
+                           v0_ml=5.5, paired_with="20261210T101500Z_rig_S2_1a2b3c4d")
+        run = self.read_run(run_dir)
+        self.assertEqual(run["purpose"], "paired")
+        self.assertEqual(run["paired_with"], "20261210T101500Z_rig_S2_1a2b3c4d")
+        self.assertEqual((run["v0_plan_ml"], run["v0_ml"]), (5.0, 5.5))
+        self.assertEqual(run["t_max_s"], 48.5)          # from the PLANNED V0, as on the rig
+        truth = read_csv(os.path.join(run_dir, "truth.csv"))
+        self.assertEqual(float(truth[0]["volume_ml"]), 5.5)
+        # Model 1 from 5.5 mL: wet when V = 24 at 18.5 s, the call at 18.5 s sees it.
+        calls = read_csv(os.path.join(run_dir, "calls.csv"))
+        self.assertEqual((calls[184]["intake"], calls[185]["intake"]), ("1", "0"))
+        self.assertEqual(float(truth[-1]["volume_ml"]), 24.0)
+
+    def test_paired_inputs_refused_when_inconsistent(self):
+        rig = "20261210T101500Z_rig_S2_1a2b3c4d"
+        bad = [
+            dict(purpose="paired", v0_ml=None, paired_with=rig),      # no measured V0
+            dict(purpose="paired", v0_ml=5.5, paired_with=None),      # no rig run ID
+            dict(purpose="paired", v0_ml=6.5, paired_with=rig),       # outside 5 +/- R14
+            dict(purpose="reference", v0_ml=5.5, paired_with=None),   # V0 only when paired
+            dict(purpose="reference", v0_ml=None, paired_with=rig),
+            dict(purpose="calibration"),                              # rig-only purpose
+            dict(purpose="cutoff_check"),
+            dict(purpose="verification"),                             # unit tests, not runs
+            dict(purpose="other"),
+        ]
+        for i, kwargs in enumerate(bad):
+            with self.subTest(**kwargs), self.assertRaises(ConfigurationError):
+                run_case(FILL_UNTIL_WET, "S2", self.out, run_id=f"bad{i}", **kwargs)
+            self.assertFalse(os.path.exists(os.path.join(self.out, f"bad{i}")))
+        # the band edge itself is accepted
+        run_case(FILL_UNTIL_WET, "S2", self.out, run_id="edge", purpose="paired",
+                 v0_ml=4.0, paired_with=rig)
+
+    def test_purpose_is_required(self):
+        with self.assertRaises(TypeError):
+            run_case(FILL_UNTIL_WET, "S2", self.out, run_id="nopurpose")
+
     def test_never_overwrites(self):
-        run_case(FILL_UNTIL_WET, "S2", self.out, run_id="same")
+        run_case(FILL_UNTIL_WET, "S2", self.out, run_id="same", purpose="reference")
         with self.assertRaises(ConfigurationError):
-            run_case(FILL_UNTIL_WET, "S2", self.out, run_id="same")
+            run_case(FILL_UNTIL_WET, "S2", self.out, run_id="same", purpose="reference")
         with self.assertRaises(FileExistsError):
             write_run_files(os.path.join(self.out, "same"), {}, [], [])
 
     def test_parameter_mismatch_refused(self):
         plan_values = dict(values(), P05=25.0)
         with self.assertRaises(ConfigurationError):
-            run_case(FILL_UNTIL_WET, "S2", self.out, run_id="x", plan_values=plan_values)
+            run_case(FILL_UNTIL_WET, "S2", self.out, run_id="x", plan_values=plan_values, purpose="reference")
         self.assertFalse(os.path.exists(os.path.join(self.out, "x")))
 
     def test_rule_violation_not_run(self):
@@ -295,7 +367,7 @@ class Controller:
     def step(self, t_s, sensor_wet):
         return (time.time() > 0, False)
 ''')
-        run_dir = run_case(path, "S2", self.out, run_id="bad")
+        run_dir = run_case(path, "S2", self.out, run_id="bad", purpose="reference")
         self.assertFalse(os.path.exists(marker))
         with open(os.path.join(run_dir, "run.json"), encoding="utf-8") as fh:
             run = json.load(fh)
@@ -306,7 +378,7 @@ class Controller:
         self.assertFalse(os.path.exists(os.path.join(run_dir, "truth.csv")))
 
     def test_determinism_replay_detects_difference(self):
-        run_dir = run_case(NONDETERMINISTIC, "S1-10", self.out, run_id="nd")
+        run_dir = run_case(NONDETERMINISTIC, "S1-10", self.out, run_id="nd", purpose="reference")
         with open(os.path.join(run_dir, "run.json"), encoding="utf-8") as fh:
             run = json.load(fh)
         self.assertFalse(run["determinism_replay"]["identical"])
@@ -320,13 +392,13 @@ class Controller:
     def test_fresh_controller_module_per_run(self):
         """D36: no memory of earlier runs, even for class-level state."""
         for run_id in ("a", "b"):
-            run_dir = run_case(NONDETERMINISTIC, "S1-10", self.out, run_id=run_id)
+            run_dir = run_case(NONDETERMINISTIC, "S1-10", self.out, run_id=run_id, purpose="reference")
             calls = read_csv(os.path.join(run_dir, "calls.csv"))
             self.assertEqual(calls[0]["intake"], "1", run_id)
 
     def test_schedule_double_runs(self):
         path = write_schedule_double(self.out, "sched", 0.0, 10.0)
-        run_dir = run_case(path, "S1-10", self.out, run_id="s")
+        run_dir = run_case(path, "S1-10", self.out, run_id="s", purpose="reference")
         truth = read_csv(os.path.join(run_dir, "truth.csv"))
         self.assertEqual(float(truth[-1]["volume_ml"]), 15.0)
 

@@ -24,7 +24,8 @@ class Model1Parameters:
 
 
 # Model 1 environment: ideal communication, so both delay slots are zero (D24).
-# step_ms = 10 (D38), max_on_ms = 45 000 (P11), settle_ms = 10 000 (R09).
+# step_ms = 10 (D38), settle_ms = 10 000 (R09). The cut-off limit is per run
+# (D45, shared.cutoff.t_max_ms) and replaces the former single value P11.
 MODEL_1_SIMULATION_PARAMETERS = SimulationParameters(
     command_delay_ms=0,
     report_delay_ms=0,
@@ -36,7 +37,6 @@ PLACEHOLDER_IDS = {
     "sensor_level_ml": "P05",
     "q_in_ml_per_s": "P06",
     "q_out_ml_per_s": "P07",
-    "max_on_ms": "P11",
     "settle_ms": "R09",
     "step_ms": "D38",
 }

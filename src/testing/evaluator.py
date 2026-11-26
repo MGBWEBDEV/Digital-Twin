@@ -17,19 +17,27 @@ if any check is undetermined, else "pass". A run that the harness ended with
 fails with the single check "controller_error" unless the setup was invalid
 (D42 (1)). Every scored run also gets the check "determinism_replay" (D42 (3)).
 
+Run purposes (`experiments/experimental_protocol.md` section 4): only
+reference, fault, pool and paired runs are scored; pool verdicts are marked
+exploratory. A paired run may start from the measured rig V0 within the
+planned V0 +/- R14 (D46). The recorded per-run cut-off `t_max_s` must equal
+the evaluator's own D45 calculation from the planned V0.
+
 Usage: PYTHONPATH=src python3 -m testing.evaluator <run_dir> [<run_dir> ...]
 writes <run_dir>/verdict.json and prints the overall verdict.
 """
 
 import json
+import math
 import os
 import sys
+from fractions import Fraction
 
 from testing import parameters as parameters_module
 from testing.runfiles import RunFileError, read_run
 from testing.scenarios import SCENARIO_RUNS
 
-EVALUATOR_VERSION = "0.3.0"
+EVALUATOR_VERSION = "0.4.0"
 
 PASS = "pass"
 FAIL = "fail"
@@ -39,6 +47,7 @@ CONTROLLER_ERROR = "controller_error"   # end reason written by the harness (D42
 
 VOLUME_EPS_ML = 1e-9      # floating-point guard for volume comparisons only
 SIMULATED = ("model_1", "model_2", "stub")
+SCORED_PURPOSES = ("reference", "fault", "pool", "paired")
 
 
 def ms(seconds):
@@ -108,6 +117,17 @@ def _close(a, b):
         return False
 
 
+def expected_t_max_ms(v0_plan_ml, p):
+    """D45, computed here independently of the harness:
+    T_max = floor((P01 - R12 - (V0_plan + R14) - P13) / Q_in,hi) to 0.1 s,
+    with decimal values taken exactly as written. None if not positive."""
+    x = {k: Fraction(str(v)) for k, v in p.items() if k in ("P01", "R12", "R14", "P13",
+                                                              "Q_in,hi")}
+    room = x["P01"] - x["R12"] - (Fraction(str(v0_plan_ml)) + x["R14"]) - x["P13"]
+    tenths = math.floor(room / x["Q_in,hi"] * 10)
+    return tenths * 100 if tenths > 0 else None
+
+
 def validity_problems(files, case, p):
     """Return a list of reasons why the run cannot be scored (empty if valid)."""
     run, calls = files.run, files.calls
@@ -166,14 +186,44 @@ def validity_problems(files, case, p):
                             f"scenario override {case.sensor_override!r}")
             break
 
-    # Model start volume must equal the scenario V0.
+    # Purpose (protocol section 4): only scored purposes are judged.
+    purpose = run["purpose"]
+    if purpose not in SCORED_PURPOSES:
+        problems.append(f"purpose {purpose!r} is not scored by the evaluator")
+
+    # Start volume (D41 (5), D46 (3)): the scenario V0, or for a paired run the
+    # measured rig V0, which must lie within the planned V0 +/- R14.
+    try:
+        v0_run = float(run["v0_ml"])
+    except (TypeError, ValueError):
+        v0_run = None
+        problems.append(f"v0_ml {run['v0_ml']!r} is not a number")
+    if v0_run is not None:
+        if purpose == "paired":
+            if abs(v0_run - case.v0_ml) > p["R14"] + VOLUME_EPS_ML:
+                problems.append(f"paired V0 {fmt_ml(v0_run)} outside scenario V0 "
+                                f"{fmt_ml(case.v0_ml)} +/- R14 {fmt_ml(p['R14'])}")
+        elif not _close(v0_run, case.v0_ml):
+            problems.append(f"run V0 {fmt_ml(v0_run)} != scenario V0 {fmt_ml(case.v0_ml)}")
+
+    # Per-run cut-off (D45) from the PLANNED V0, also for paired runs.
+    expected_t_max = expected_t_max_ms(case.v0_ml, p)
+    try:
+        t_max_run = ms(float(run["t_max_s"]))
+    except (TypeError, ValueError):
+        t_max_run = None
+    if expected_t_max is None or t_max_run != expected_t_max:
+        problems.append(f"t_max_s {run['t_max_s']!r} != D45 value "
+                        f"{fmt_s(expected_t_max)} for planned V0 {fmt_ml(case.v0_ml)}")
+
+    # Model start volume must equal the run's start volume.
     if files.truth is not None:
         first = files.truth[0]
         if first.t_ms != 0:
             problems.append("truth.csv does not start at t = 0")
-        elif abs(first.volume_ml - case.v0_ml) > 1e-6:
-            problems.append(f"truth V0 {fmt_ml(first.volume_ml)} != scenario V0 "
-                            f"{fmt_ml(case.v0_ml)}")
+        elif v0_run is not None and abs(first.volume_ml - v0_run) > 1e-6:
+            problems.append(f"truth V0 {fmt_ml(first.volume_ml)} != run V0 "
+                            f"{fmt_ml(v0_run)}")
     return problems
 
 
@@ -443,6 +493,8 @@ def evaluate_files(files, params=None, scenarios=None):
         "run_id": run["run_id"],
         "scenario_id": run["scenario_id"],
         "environment": run["environment"],
+        "purpose": run["purpose"],
+        "exploratory": run["purpose"] == "pool",      # protocol section 4
         "evaluator_version": EVALUATOR_VERSION,
         "parameters": p,
         "provisional": bool(parameters_module.placeholder_ids(param_set)),

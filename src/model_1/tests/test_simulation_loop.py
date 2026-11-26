@@ -17,6 +17,11 @@ Call loop follows D38 (architecture section 5): at each call t_k read the
 sensor, send the command, advance by the call period; after the call at
 T_end = 60 s (R08) the environment's finish() commands OFF and settles for
 T_set = 10 s (R09). V_end is the volume after settling.
+
+Cut-off limit per run (D45, protocol section 8), worked out by hand with the
+placeholders C = 60, R12 = 5, R14 = 1, V_ro = 0.5, Q_in,hi = 1.0:
+T_max = floor((60 - 5 - (V0_plan + 1) - 0.5) / 1.0) = 48.5 s for V0_plan = 5 mL
+and 23.5 s for V0_plan = 30 mL. Literal values below, not computed by code.
 """
 
 import unittest
@@ -27,6 +32,12 @@ from shared.simulation_environment import SimulationEnvironment
 
 CALL_MS = 100          # R01
 T_END_MS = 60_000      # R08
+T_MAX_V0_5_MS = 48_500     # D45, planned V0 = 5 mL (hand calculation above)
+T_MAX_V0_30_MS = 23_500    # D45, planned V0 = 30 mL
+
+
+def start(env, v0, t_max_ms=T_MAX_V0_5_MS):
+    env.start(InitialConditions(v0_ml=v0, t_max_ms=t_max_ms))
 
 
 def run_schedule(v0, intake_off_at_ms, t_end_ms=T_END_MS):
@@ -36,7 +47,7 @@ def run_schedule(v0, intake_off_at_ms, t_end_ms=T_END_MS):
     Returns (env, calls) where calls is a list of (t_ms, sensor, intake).
     """
     env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-    env.start(InitialConditions(v0_ml=v0))
+    start(env, v0)
     calls = []
     t = 0
     while True:
@@ -102,37 +113,40 @@ class TestFullLoopChecks(unittest.TestCase):
         self.assertEqual(events_named(env, "cutoff"), [])
 
     def test_M1_12_fault_intake_never_off(self):
+        # Recomputed for D45: T_max = 48.5 s from V0 = 5 mL. V_end = 5 + 48.5
+        # = 53.5 mL: above the safe mark P04 = 50 (FR08-P1 fails), 6.5 mL
+        # below capacity, no overflow.
         env, _ = run_schedule(5, None)
         self.assertEqual(events_named(env, "cutoff"),
-                         [(45_000, "sim_env", "cutoff", "pump=intake")])
-        self.assertEqual(v_end(env), 50.0)                 # exactly the safe mark P04
-        self.assertEqual(v_peak(env), 50.0)
+                         [(48_500, "sim_env", "cutoff", "pump=intake")])
+        self.assertEqual(v_end(env), 53.5)
+        self.assertEqual(v_peak(env), 53.5)
         self.assertEqual(events_named(env, "overflow"), [])
 
 
 class TestCutOffInEnvironment(unittest.TestCase):
 
-    def make_env(self, v0=5):
+    def make_env(self, v0=5, t_max_ms=T_MAX_V0_5_MS):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-        env.start(InitialConditions(v0_ml=v0))
+        start(env, v0, t_max_ms)
         return env
 
     def test_pump_stays_off_while_command_stays_on(self):
         env = self.make_env()
         env.command(True, False)
-        env.advance_to(50_000)
-        self.assertEqual(env.truth_rows[-1]["volume_ml"], 50.0)
+        env.advance_to(52_000)
+        self.assertEqual(env.truth_rows[-1]["volume_ml"], 53.5)   # 5 + 48.5
         self.assertFalse(env.truth_rows[-1]["intake_flowing"])
 
     def test_new_on_edge_restarts_timer(self):
         env = self.make_env(v0=0)
         env.command(True, False)
-        env.advance_to(46_000)              # cut-off at 45 s: V = 45
+        env.advance_to(49_000)              # cut-off at 48.5 s: V = 48.5
         env.command(False, False)
-        env.advance_to(46_100)
-        env.command(True, False)            # new ON edge at 46.1 s
-        env.advance_to(56_100)
-        self.assertEqual(env.truth_rows[-1]["volume_ml"], 55.0)
+        env.advance_to(49_100)
+        env.command(True, False)            # new ON edge at 49.1 s
+        env.advance_to(59_100)
+        self.assertEqual(env.truth_rows[-1]["volume_ml"], 58.5)
         self.assertEqual(len(events_named(env, "cutoff")), 1)
 
     def test_outtake_has_its_own_cutoff(self):
@@ -140,19 +154,41 @@ class TestCutOffInEnvironment(unittest.TestCase):
         env.command(False, True)
         env.advance_to(50_000)
         self.assertEqual(events_named(env, "cutoff"),
-                         [(45_000, "sim_env", "cutoff", "pump=outtake")])
-        self.assertEqual(env.truth_rows[-1]["volume_ml"], 15.0)
+                         [(48_500, "sim_env", "cutoff", "pump=outtake")])
+        self.assertEqual(env.truth_rows[-1]["volume_ml"], 11.5)   # 60 - 48.5
 
     def test_controller_not_informed_of_cutoff(self):
         # The interface offers only time and the sensor; the cut-off changes
         # neither (sensor stays as the water dictates).
         env = self.make_env(v0=5)
         env.command(True, False)
-        env.advance_to(44_900)
+        env.advance_to(48_400)
         before = env.sensor()
-        env.advance_to(45_100)
+        env.advance_to(48_600)
         self.assertEqual(before, env.sensor())
         self.assertIs(type(env.sensor()), bool)
+
+    def test_limit_is_set_per_run(self):
+        # D45: the same environment object takes each run's own limit at start().
+        env = self.make_env(v0=30, t_max_ms=T_MAX_V0_30_MS)
+        env.command(True, False)
+        env.advance_to(25_000)
+        self.assertEqual(events_named(env, "cutoff"),
+                         [(23_500, "sim_env", "cutoff", "pump=intake")])
+        self.assertEqual(env.truth_rows[-1]["volume_ml"], 53.5)   # 30 + 23.5
+        start(env, 5, T_MAX_V0_5_MS)
+        env.command(True, False)
+        env.advance_to(25_000)
+        self.assertEqual(events_named(env, "cutoff"), [])
+        self.assertEqual(env.t_max_ms, 48_500)
+
+    def test_limit_must_be_given_and_on_step_grid(self):
+        env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
+        for bad in (0, -100, 48_505, 48.5, None):
+            with self.subTest(t_max_ms=bad), self.assertRaises(ValueError):
+                start(env, 5, bad)
+        with self.assertRaises(TypeError):
+            env.start(InitialConditions(v0_ml=5))            # no default limit (P11 removed)
 
 
 class TestEnvironmentConventions(unittest.TestCase):
@@ -164,18 +200,19 @@ class TestEnvironmentConventions(unittest.TestCase):
     def test_model_1_delay_slots_are_zero(self):
         p = MODEL_1_SIMULATION_PARAMETERS
         self.assertEqual((p.command_delay_ms, p.report_delay_ms), (0, 0))
-        self.assertEqual((p.step_ms, p.max_on_ms, p.settle_ms), (10, 45_000, 10_000))
+        self.assertEqual((p.step_ms, p.settle_ms), (10, 10_000))
+        self.assertFalse(hasattr(p, "max_on_ms"))           # per run since D45
 
     def test_command_takes_effect_in_the_same_step(self):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-        env.start(InitialConditions(v0_ml=5))
+        start(env, 5)
         env.command(True, False)
         env.advance_to(10)
         self.assertAlmostEqual(env.truth_rows[-1]["volume_ml"], 5.01, places=12)
 
     def test_sensor_report_is_immediate(self):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-        env.start(InitialConditions(v0_ml=23.99))
+        start(env, 23.99)
         env.command(True, False)
         self.assertFalse(env.sensor())
         env.advance_to(10)
@@ -185,7 +222,7 @@ class TestEnvironmentConventions(unittest.TestCase):
 
     def test_wet_at_start_reported_at_first_call(self):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-        env.start(InitialConditions(v0_ml=30))
+        start(env, 30)
         self.assertTrue(env.sensor())
 
     def test_truth_logged_at_start_and_every_step(self):
@@ -195,7 +232,7 @@ class TestEnvironmentConventions(unittest.TestCase):
 
     def test_finish_switches_pumps_off_and_settles(self):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-        env.start(InitialConditions(v0_ml=5))
+        start(env, 5)
         env.command(True, False)            # still ON when the run ends
         env.advance_to(10_000)
         env.finish()
@@ -213,11 +250,11 @@ class TestEnvironmentConventions(unittest.TestCase):
     def test_invalid_start_volume_rejected(self):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
         with self.assertRaises(ValueError):
-            env.start(InitialConditions(v0_ml=61))
+            start(env, 61)
 
     def test_advance_must_be_on_step_grid_and_forward(self):
         env = SimulationEnvironment(build_model_1(), MODEL_1_SIMULATION_PARAMETERS)
-        env.start(InitialConditions(v0_ml=5))
+        start(env, 5)
         with self.assertRaises(ValueError):
             env.advance_to(15)
         env.advance_to(100)

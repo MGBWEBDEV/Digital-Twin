@@ -40,7 +40,7 @@ Values are placeholders (D34). "Env" means the shared simulation environment (`d
 | Q_out | Outtake flow at the fixed speed | mL/s | Both | 1.0 | P07 → WP04 |
 | V_dead | Water the outtake cannot remove | mL | Both | 0 | P09 → rig check |
 | V0 | Settled start volume | mL | Both | 5 (default) | P10; per scenario (WP03 section 8) |
-| T_max | Cut-off maximum continuous ON time | s | Env, both | 45 | P11 → WP04 (D27) |
+| T_max | Cut-off maximum continuous ON time, set per run from the planned V0 (D45) | s | Env, both | 48.5 (V0 = 5), 23.5 (V0 = 30) | Rule of `experiments/experimental_protocol.md` section 8 (replaces P11) → WP04 |
 | t_p | Intake priming time at Q_in | s | Model 2, candidate | 2 | P12 → WP04 |
 | V_p | Intake tube volume to fill before water reaches the tank, V_p = Q_in · t_p | mL | Model 2, candidate | 2 | Derived from P06, P12 |
 | f0 | Intake tube fill at the start of a run | mL | Model 2, candidate | 0 | Researcher 2026-11-25: water stays in the tube after OFF, and the planned reset pumps or drains for a fixed time to empty it, so runs start with an empty tube. Reset details and duration in WP08; confirm in WP04. 2026-11-25 (D40, approved by researcher): fixed at 0 for every simulated run, no longer an input. Primed-tube cases (f0 = V_p) below are kept only for reference and for WP04 identifiability (section 8); to be revised in final WP05 |
@@ -249,7 +249,7 @@ Inclusion rule (D24): an effect enters Model 2 only if WP04 shows it larger than
 |---|---|---|---|---|---|---|
 | — | Water balance, calibrated Q_in, Q_out | Included (both models) | Shared | P06, P07 | Calibration only | D24 |
 | — | Overflow with spill, empty tank with shortfall, dead volume | Included (both models) | Shared | P01, P09 | — | Boundary rules, section 4.8 |
-| — | Cut-off | Included (both environments) | Shared | P11 | — | D27, D38 |
+| — | Cut-off | Included (both environments) | Shared | T_max per run (D45; formerly P11) | — | D27, D38, D45 |
 | E1 | Intake tube priming | Candidate | Model 2 | P12 (V_p), f0 | Volume deficit of a timed fill from an empty tube, vs a primed tube, > P03 | Only if the tube can start empty; f0 fixed by WP08 |
 | E2 | Intake run-on after OFF | Candidate | Model 2 | P13 | Settled increase after OFF > P03 | Also acts after a cut-off |
 | E3 | Sensor trigger point offset | Candidate | Model 2 | δ_trig (TBD) | Measured switch volume differs from the value given to the controller by > P03 | May vanish by construction (section 5.4) |
@@ -273,7 +273,7 @@ If no candidate qualifies, the finding "Model 1 is sufficient at this rig's reso
 
 ## 9. Hand-calculated check cases
 
-Worked out by hand from sections 4 and 5, not from code. Placeholders: Q_in = Q_out = 1.0 mL/s, C = 60, V_sensor = 24, V_dead = 0, T_max = 45 s, Δt_s = 10 ms, Δt_c = 100 ms. Model 2 provisional configuration: V_p = 2 mL, V_ro = 0.5 mL, δ_trig = 0, d_s = 0.1 s, d_c = d_r = 0.02 s; f0 is stated per case. "Correct controller" means the expected behaviour of WP06; "fault" cases are illustrations, not results. Purposes: oracles for the mathematical verification of WP10 and WP11 and cross-checks for WP12; to be rechecked by the researcher. These complement, and agree with, `design/functional_requirements.md` section 9.
+Worked out by hand from sections 4 and 5, not from code. Placeholders: Q_in = Q_out = 1.0 mL/s, C = 60, V_sensor = 24, V_dead = 0, T_max per run (D45, protocol section 8: ⌊(C − R12 − (V0_plan + R14) − V_ro) / Q_in,hi⌋ to 0.1 s with C = 60, R12 = 5, R14 = 1, V_ro = 0.5, Q_in,hi = 1.0, i.e. 48.5 s for V0 = 5 mL and 23.5 s for V0 = 30 mL; M1-12, M2-8, M2-9 recomputed by hand 2026-11-26, previously T_max = 45 s), Δt_s = 10 ms, Δt_c = 100 ms. Model 2 provisional configuration: V_p = 2 mL, V_ro = 0.5 mL, δ_trig = 0, d_s = 0.1 s, d_c = d_r = 0.02 s; f0 is stated per case. "Correct controller" means the expected behaviour of WP06; "fault" cases are illustrations, not results. Purposes: oracles for the mathematical verification of WP10 and WP11 and cross-checks for WP12; to be rechecked by the researcher. These complement, and agree with, `design/functional_requirements.md` section 9.
 
 ### 9.1 Model 1 (TankSystem level, effective commands given directly)
 
@@ -295,7 +295,7 @@ Worked out by hand from sections 4 and 5, not from code. Placeholders: Q_in = Q_
 | M1-9 | S2, FR03 | Wet at 19.0 s; call at 19.0 s sees wet and commands OFF; V_end = 24.0 |
 | M1-10 | S4, sensor held dry, controller stops at T_deadline = 30 s | OFF at call 30.0 s; V_end = 35.0 |
 | M1-11 | S5, FR09 48 mL | t_w = 19.0 s; OFF at 19.0 + 24 = 43.0 s; V_end = 48.0; no cut-off |
-| M1-12 | Fault: intake never OFF in S2 | Cut-off at 45.0 s; V_end = 50.0 (exactly the safe mark P04); `cutoff` event |
+| M1-12 | Fault: intake never OFF in S2 | Cut-off at 48.5 s; V_end = 5 + 48.5 = 53.5 (above the safe mark P04: FR08-P1 fails; 6.5 mL below capacity, no overflow); `cutoff` event |
 
 ### 9.3 Model 2, one effect at a time (others zero)
 
@@ -316,12 +316,12 @@ Step-by-step for S2 with f0 = 0: command ON at 0 → flow from 0.02 s → tube f
 | M2-5 | S1, FR01 10 s / 20 s | 13.5 / 23.5 (sensor never wet in 20 s run) | 15.5 / 25.5 | 15.0 / 25.0 |
 | M2-6 | S2, FR03 | t_w = 21.2 s; V_end = 24.70 | t_w = 19.2 s; V_end = 24.70 | 24.0 |
 | M2-7 | S4, stop at T_deadline (call 30.0 s) | 33.5 | 35.5 | 35.0 |
-| M2-8 | S5, FR09 48 mL (T_extra = 24 s) | t_w = 21.2 s, controller would stop at 45.2 s, but the cut-off fires at 45.02 s (45 s after flow start at 0.02 s); V = 48.0 + run-on = 48.5; FR08-L4 fails | t_w = 19.2 s; OFF 43.2 s, flow stops 43.22 s; V_end = 48.7; no cut-off | 48.0, no cut-off |
-| M2-9 | Fault: intake never OFF in S2 | Cut-off 45.02 s; V_end = 48.5 | Cut-off 45.02 s; V_end = 50.5 > safe mark: FR08-P1 fails | 50.0 (passes exactly at the limit) |
+| M2-8 | S5, FR09 48 mL (T_extra = 24 s) | t_w = 21.2 s; OFF 45.2 s, flow stops 45.22 s, before the cut-off would fire at 48.52 s (48.5 s after flow start at 0.02 s); pumped 45.2 + run-on 0.5 = 45.7, tube 2.0; V_end = 48.7; no cut-off | t_w = 19.2 s; OFF 43.2 s, flow stops 43.22 s; V_end = 48.7; no cut-off | 48.0, no cut-off |
+| M2-9 | Fault: intake never OFF in S2 | Cut-off 48.52 s; pumped 48.5 + run-on 0.5 = 49.0, tube 2.0; V_end = 52.0 > safe mark: FR08-P1 fails | Cut-off 48.52 s; V_end = 5 + 49.0 = 54.0 > safe mark: FR08-P1 fails | 53.5: FR08-P1 fails |
 | M2-10 | Fault: one-call intake pulse (0.0–0.1 s) in S3, V0 = 30 | 0.1 + 0.5 mL all into the tube; V_end = 30.0 | V_end = 30.6 | 30.1 |
 | M2-11 | Any M1 case with all Model 2 parameters zero | Identical to Model 1 | Identical | — |
 
-What these cases show (with placeholder values only, not findings): the correct controller can trigger the cut-off in Model 2 but not in Model 1 (M2-8, f0 = 0), and the same faulty controller can pass FR08-P1 in Model 1 and fail it in Model 2 (M2-9, f0 = V_p). The models can therefore give different verdicts, which is what D25 compares against the rig. They also show that the start state of the intake tube changes the outcome as much as the effects themselves, so WP08 must fix it. The cut-off margin finding of WP03 (cut-off sized to the safe mark leaves no room for run-on) is confirmed for a primed tube.
+What these cases show (with placeholder values only, not findings): with the earlier single limit of 45 s, the correct controller triggered the cut-off in Model 2 but not in Model 1 (M2-8, f0 = 0), and the same faulty controller passed FR08-P1 in Model 1 and failed it in Model 2 (M2-9, f0 = V_p). With the per-run limit of D45 (48.5 s from 5 mL) neither difference remains: M2-8 no longer reaches the cut-off, and in M2-9 all three columns fail FR08-P1 while staying below capacity. The other rows differ between the models in volume or timing only; checked against the WP03 checks with these placeholders, none of them gives a different verdict (e.g. M2-5: delivered 8.5 vs 10.0 mL, within ε_V = 2 mL; M2-10: FR03-L3 fails in every column). This table therefore no longer contains a placeholder example of a model verdict difference. Whether such differences occur with real controllers and final parameter values is the D25 question; nothing here predicts it. They also show that the start state of the intake tube changes the outcome as much as the effects themselves, so WP08 must fix it. The cut-off margin finding of WP03 (cut-off sized to the safe mark leaves no room for run-on) is confirmed for a primed tube.
 
 ## 10. Downstream notes (not executed here)
 

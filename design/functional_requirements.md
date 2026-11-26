@@ -30,7 +30,7 @@ The suite evaluates AI-generated controller code (host-side Python, D21) against
 | t_w | Time of the first call whose sensor input is wet. Measured at the controller interface, so serial latency is not part of the logical response check; its physical effect shows in the volume checks |
 | V0, V_end | Settled volume at the start, settled volume after T_end plus settling time (R09). In the models: modelled volume at the same points |
 | V_peak | Highest volume during the run. Models only; on the rig undetermined unless it can be read as a settled level (D24) |
-| Cut-off | Independent maximum ON time in firmware and in both simulation adapters (D27; P11) |
+| Cut-off | Independent maximum ON time in firmware and in both simulation adapters (D27), set per run from the planned start volume (D45; formerly P11) |
 | Single interval rule | In every fill task the intake has exactly one ON interval. Reason: each extra start or stop adds priming and run-on on the rig, which would make the physical outcome depend on an arbitrary pause pattern |
 
 All three environments start a run with both pumps OFF, the sensor state recorded and V0 recorded.
@@ -46,7 +46,7 @@ Rig parameters come from `design/physical_system.md` section 12 (P01–P19). Req
 | R03 | Timing tolerance ε_t | 0.2 s | Two call periods (commands are quantized to calls) |
 | R04 | Response limit t_resp (from t_w to intake OFF) | 0.1 s | One call period: the controller should switch OFF at the call that first sees wet, or the next one |
 | R05 | Volume tolerance ε_V | 2 mL | Two readings of ±0.5 mL (P03) plus run-to-run spread ±0.5 mL (P08), rounded up |
-| R06 | Sensor-wait deadline T_deadline (stop if the sensor is not wet by then) | 30 s | Expected time to the sensor from P10 is (24 − 5) / 1 = 19 s; about 1.5 times that. Stays below the cut-off P11 = 45 s so the controller's own safety acts first |
+| R06 | Sensor-wait deadline T_deadline (stop if the sensor is not wet by then) | 30 s | Expected time to the sensor from P10 is (24 − 5) / 1 = 19 s; about 1.5 times that. Stays below the cut-off (per run, D45: 48.5 s from P10) so the controller's own safety acts first |
 | R07 | Known parameters given to the controller | V_sensor = P05, Q_in = P06, T_deadline = R06 | D29 (prompt contains known parameters only) |
 | R08 | Observation time T_end | 60 s | Longer than the longest expected fill (43 s, section 9) and the cut-off |
 | R09 | Settling time before a rig reading | 10 s | Round value; WP04 |
@@ -151,10 +151,10 @@ These expected results are worked out by hand from the requirements and placehol
 | S5, 30 mL | T_extra = 6 s; OFF at 25 s; V_end = 30 mL |
 | S5, 40 mL | T_extra = 16 s; OFF at 35 s; V_end = 40 mL |
 | S5, 45 mL | T_extra = 21 s; OFF at 40 s; V_end = 45 mL |
-| S5, 48 mL | T_extra = 24 s; OFF at 43 s; V_end = 48 mL; 2 s before the cut-off at 45 s |
-| Faulty example: intake never switched OFF in S2 | Cut-off at 45 s; V_end = 50 mL = safe mark: FR03-L2, FR08-L4 fail; FR08-P1 passes exactly at the limit |
+| S5, 48 mL | T_extra = 24 s; OFF at 43 s; V_end = 48 mL; 5.5 s before the cut-off at 48.5 s (D45) |
+| Faulty example: intake never switched OFF in S2 | Cut-off at 48.5 s (D45); V_end = 53.5 mL, above the safe mark but below capacity: FR03-L2, FR08-L4 and FR08-P1 fail (recomputed 2026-11-26; with the former 45 s limit: 50 mL, FR08-P1 passed exactly at the limit) |
 
-The last row shows that a cut-off sized to the safe mark (P11) leaves no margin: in Model 2, run-on after the cut-off would exceed the mark. WP08 should size the cut-off with margin below the safe mark, or below capacity as D27 states, and decide which.
+The former single cut-off sized to the safe mark (P11) left no margin: in Model 2, run-on after the cut-off would exceed the mark. Settled by D45 (WP08): the cut-off is sized per run below capacity, so overfilling past the safe mark remains detectable through FR08-P1.
 
 ## 10. Mapping a failure to controller logic
 

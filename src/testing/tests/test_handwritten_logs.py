@@ -301,6 +301,59 @@ class TestInvalidRuns(HandCase):
         v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(6.0, 16.0))
         self.assertInvalid(v, "V0")
 
+    def test_paired_run_v0_within_band_scored(self):
+        # D46 (3): a paired run starts from the measured rig V0 (here 5.5 mL,
+        # planned 5 +/- R14 = 1 mL); T_max stays that of the planned V0.
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.5, 15.5),
+                          purpose="paired", v0_ml=5.5)
+        self.assertEqual(v["invalid_reasons"], [])
+        self.assertEqual(v["overall"], "pass")
+        self.assertEqual(v["purpose"], "paired")
+
+    def test_paired_run_v0_outside_band(self):
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(6.5, 16.5),
+                          purpose="paired", v0_ml=6.5)
+        self.assertInvalid(v, "paired V0")
+
+    def test_changed_v0_only_for_paired_runs(self):
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.5, 15.5),
+                          v0_ml=5.5)
+        self.assertInvalid(v, "run V0")
+
+    def test_truth_v0_differs_from_run_v0(self):
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.0, 15.0),
+                          purpose="paired", v0_ml=5.5)
+        self.assertInvalid(v, "truth V0")
+
+    def test_t_max_must_follow_planned_v0(self):
+        # D45: 48.5 s for V0 = 5 mL, 23.5 s for V0 = 30 mL (hand calculation).
+        # A run made with the old single limit (45 s) is a setup error.
+        calls, truth = self.good()
+        v = self.evaluate("S1-10", calls, truth, t_max_s=45.0)
+        self.assertInvalid(v, "t_max_s")
+        v = self.evaluate("S3-FR03", hand_calls([], wet_from_ms=0), hand_truth(30.0, 30.0),
+                          t_max_s=48.5)
+        self.assertInvalid(v, "t_max_s")
+        v = self.evaluate("S3-FR03", hand_calls([], wet_from_ms=0), hand_truth(30.0, 30.0))
+        self.assertEqual(v["invalid_reasons"], [])
+        # Paired runs keep the planned-V0 limit even when the measured V0 differs.
+        v = self.evaluate("S1-10", hand_calls([(0, 10_000)]), hand_truth(5.5, 15.5),
+                          purpose="paired", v0_ml=5.5, t_max_s=48.0)
+        self.assertInvalid(v, "t_max_s")
+
+    def test_unscored_purpose(self):
+        for purpose in ("calibration", "cutoff_check", "verification", "unknown"):
+            with self.subTest(purpose=purpose):
+                v = self.evaluate("S1-10", *self.good(), purpose=purpose)
+                self.assertInvalid(v, "not scored")
+
+    def test_pool_runs_marked_exploratory(self):
+        v = self.evaluate("S1-10", *self.good(), purpose="pool")
+        self.assertEqual(v["overall"], "pass")
+        self.assertTrue(v["exploratory"])
+        v = self.evaluate("S1-10", *self.good(), purpose="fault")
+        self.assertFalse(v["exploratory"])
+
     def test_unknown_scenario(self):
         calls, truth = self.good()
         v = self.evaluate("S1-10", calls, truth, scenario_id="S9")
@@ -329,6 +382,17 @@ class TestMalformedFiles(HandCase):
             fh.write("60100,maybe,0,0,0\n")
         with self.assertRaises(RunFileError):
             evaluate_run(run_dir)
+
+    def test_missing_new_run_keys(self):
+        # purpose, v0_ml and t_max_s are required run.json keys (D45, D46).
+        for key in ("purpose", "v0_ml", "t_max_s"):
+            with self.subTest(key=key):
+                run_dir = os.path.join(self._tmp.name, f"no_{key}")
+                run = run_json("S1-10")
+                del run[key]
+                write_run(run_dir, run, hand_calls([(0, 10_000)]), truth=hand_truth(5.0, 15.0))
+                with self.assertRaises(RunFileError):
+                    evaluate_run(run_dir)
 
     def test_missing_truth_for_model_run(self):
         run_dir = os.path.join(self._tmp.name, "broken")

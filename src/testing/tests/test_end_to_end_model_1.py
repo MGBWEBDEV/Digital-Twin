@@ -56,7 +56,8 @@ class EndToEnd(unittest.TestCase):
         return write_schedule_double(self.out, name, *times)
 
     def evaluate(self, controller_path, case_id, run_id):
-        run_dir = run_case(controller_path, case_id, self.out, run_id=run_id)
+        run_dir = run_case(controller_path, case_id, self.out, run_id=run_id,
+                           purpose="reference")
         verdict = evaluate_run(run_dir)
         write_verdict(run_dir, verdict)
         self.assertTrue(os.path.isfile(os.path.join(run_dir, "verdict.json")))
@@ -102,16 +103,17 @@ class TestCorrectBehaviour(EndToEnd):
 class TestFaultyBehaviour(EndToEnd):
 
     def test_s2_intake_never_switched_off(self):
-        """WP03 section 9 faulty example: cut-off at 45 s, V_end = 50 mL."""
+        """WP03 section 9 faulty example (M1-12), recomputed for D45: cut-off
+        at 48.5 s, V_end = 53.5 mL, above the safe mark."""
         path = write_schedule_double(self.out, "never_off", 0.0, None)
         v = self.evaluate(path, "S2", "never_off")
         r = self.results(v)
         self.assertEqual(v["overall"], "fail")
         self.assertEqual(r["FR03-L2"], "fail")
         self.assertEqual(r["FR08-L4"], "fail")
-        self.assertEqual(r["FR08-P1"], "pass")                    # exactly at the limit
-        self.assertEqual(v["observations"]["cutoff_events_ms"], [45_000])
-        self.assertEqual(v["observations"]["v_end_ml"], 50.0)
+        self.assertEqual(r["FR08-P1"], "fail")                    # 53.5 > 50 mL
+        self.assertEqual(v["observations"]["cutoff_events_ms"], [48_500])
+        self.assertEqual(v["observations"]["v_end_ml"], 53.5)
         self.assertEqual(v["inferred_end_state"], "NOT_STOPPED")
 
     def test_s2_stop_at_19_1_accepted_19_2_rejected(self):

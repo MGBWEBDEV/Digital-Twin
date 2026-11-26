@@ -54,11 +54,14 @@ class Request:
 class RunPlan:
     """Everything the harness needs for one run.
 
-    v0_ml            start volume given to the environment (never to the controller)
+    v0_ml            start volume given to the environment (never to the controller);
+                     the scenario V0, or for a paired run the measured rig V0 (D46 (3))
     sensor_override  None, or "dry": the controller's sensor input is held dry
                      for the whole run while the plant is unaffected (S4, D29)
     dt_call_ms       call period (R01)
     t_end_ms         observation time T_end (R08); the last call is at T_end
+    t_max_ms         per-run cut-off limit from the PLANNED start volume (D45);
+                     read by the environment at start(), never given to the controller
     late_call_ms     a call later than its nominal time by at least this much
                      is logged as `late_call` (rig only; placeholder, WP09a)
     """
@@ -69,6 +72,7 @@ class RunPlan:
     sensor_override: Optional[str]
     dt_call_ms: int
     t_end_ms: int
+    t_max_ms: int
     late_call_ms: int = 50
 
     def __post_init__(self):
@@ -76,6 +80,9 @@ class RunPlan:
             raise ValueError(f"unknown sensor override {self.sensor_override!r}")
         if self.dt_call_ms <= 0 or self.t_end_ms % self.dt_call_ms:
             raise ValueError("T_end must be a whole number of call periods")
+        if (not isinstance(self.t_max_ms, int) or isinstance(self.t_max_ms, bool)
+                or self.t_max_ms <= 0):
+            raise ValueError("t_max_ms must be a positive integer (D45)")
 
 
 @dataclass
@@ -112,7 +119,7 @@ def run_controller(controller_class, env, plan: RunPlan) -> RunRecord:
     log = record.events.append
     override = sensor_override(plan)
 
-    env.start(plan)                                  # V0, both pumps OFF, t = 0 (D36)
+    env.start(plan)                                  # V0, T_max, both pumps OFF, t = 0 (D36, D45)
     try:
         controller = controller_class(*plan.request.args())
     except Exception as exc:                         # noqa: BLE001 - any controller fault

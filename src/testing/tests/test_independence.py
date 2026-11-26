@@ -65,7 +65,9 @@ def design_table_values(path, id_pattern):
 class TestParametersMatchDesign(unittest.TestCase):
 
     def test_r_values(self):
-        doc = design_table_values("design/functional_requirements.md", r"R\d\d")
+        # R01-R11 from WP03; R12-R16 were added by the WP08 protocol section 3.
+        doc = design_table_values("experiments/experimental_protocol.md", r"R1[2-6]")
+        doc.update(design_table_values("design/functional_requirements.md", r"R\d\d"))
         for pid, p in PARAMETERS.items():
             if pid.startswith("R"):
                 with self.subTest(pid=pid):
@@ -77,6 +79,23 @@ class TestParametersMatchDesign(unittest.TestCase):
             if pid.startswith("P"):
                 with self.subTest(pid=pid):
                     self.assertEqual(p.value, doc[pid])
+
+    def test_q_in_hi_is_the_protocol_example(self):
+        # No ID in the protocol; section 8 example uses Q_in,hi = 1.0 mL/s.
+        self.assertEqual(PARAMETERS["Q_in,hi"].value, 1.0)
+
+    def test_protocol_rules_that_depend_on_t_max(self):
+        # Protocol section 3: R06 at least 5 s below T_max of the S2/S4 start
+        # volume; R08 at least the largest per-run T_max + 5 s. T_max values
+        # are the hand calculation of section 8 (48.5 s from 5 mL, 23.5 s
+        # from 30 mL).
+        t_max_s = {5.0: 48.5, 30.0: 23.5}
+        self.assertLessEqual(PARAMETERS["R06"].value,
+                             t_max_s[SCENARIO_RUNS["S2"].v0_ml] - 5)
+        self.assertLessEqual(PARAMETERS["R06"].value,
+                             t_max_s[SCENARIO_RUNS["S4"].v0_ml] - 5)
+        self.assertGreaterEqual(PARAMETERS["R08"].value,
+                                max(t_max_s[c.v0_ml] for c in SCENARIO_RUNS.values()) + 5)
 
     def test_all_values_are_placeholders(self):
         # D34: nothing here is a measurement yet.

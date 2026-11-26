@@ -8,7 +8,8 @@ Nothing here is a controller, a model or the harness:
   while the intake is on and reports wet at a fixed level. It has no capacity,
   spill, dead volume, outtake or Model 2 effect and is not Model 1 (WP10).
 - `simulate` is a minimal loop in the D38 call order with the D38 cut-off,
-  only so that the evaluator can be exercised on complete run files.
+  only so that the evaluator can be exercised on complete run files. Its
+  cut-off limit per planned V0 (D45) is a literal hand calculation.
 """
 
 import csv
@@ -22,7 +23,9 @@ DT_CALL_MS = 100
 DT_SIM_MS = 10
 T_END_MS = 60_000
 SETTLE_MS = 10_000
-CUTOFF_MS = 45_000     # P11 placeholder; the evaluator itself never uses it
+# D45 per-run cut-off by planned V0, worked out by hand (protocol section 8):
+# floor((60 - 5 - (V0 + 1) - 0.5) / 1.0) to 0.1 s.
+T_MAX_MS = {5.0: 48_500, 30.0: 23_500}
 
 
 def run_json(case_id, environment="stub", **overrides):
@@ -32,10 +35,13 @@ def run_json(case_id, environment="stub", **overrides):
         "run_id": f"test-{case_id}",
         "environment": environment,
         "scenario_id": case_id,
+        "purpose": "reference",
+        "v0_ml": case.v0_ml,
+        "t_max_s": T_MAX_MS[case.v0_ml] / 1000,
         "request": {"task": case.task, "parameter": case.parameter,
                     "v_sensor_ml": p["P05"], "q_in_ml_per_s": p["P06"],
                     "t_deadline_s": p["R06"]},
-        "parameters": dict(p, P11=CUTOFF_MS / 1000),
+        "parameters": dict(p),
         "dt_call_ms": DT_CALL_MS,
         "dt_sim_ms": DT_SIM_MS,
         "end_reason": "normal",
@@ -138,6 +144,7 @@ def simulate(run_dir, scenario_id, intervals, plant=None):
     plant = plant or StubTankSystem()
     plant.reset(case.v0_ml)
     command = intake_from(intervals)
+    cutoff_ms = T_MAX_MS[case.v0_ml]
     calls, events, truth = [], [], [(0, plant.volume(), False, 0.0)]
     t, on_timer, forced_off, prev_cmd = 0, 0, False, False
 
@@ -145,7 +152,7 @@ def simulate(run_dir, scenario_id, intervals, plant=None):
         nonlocal t, on_timer, forced_off
         while t < until:
             effective = intake_cmd and not forced_off
-            if effective and on_timer >= CUTOFF_MS:
+            if effective and on_timer >= cutoff_ms:
                 forced_off, effective = True, False
                 events.append((t, "simulation", "cutoff", "intake"))
             plant.step(DT_SIM_MS, effective, False)

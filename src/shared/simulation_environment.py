@@ -1,6 +1,6 @@
 """Simulation environment shared by Model 1 and Model 2
 (design/software_architecture.md sections 4-6; design/mathematical_models.md
-section 4.3; D27, D38, D39).
+section 4.3; D27, D38, D39, D45).
 
 Signal chain inside one simulation step, mirroring the rig:
 command delay -> cut-off -> TankSystem (pumps, water, sensor) -> report delay.
@@ -28,26 +28,26 @@ class SimulationParameters:
     """Environment parameters. Values are placeholders (D34) unless noted.
 
     step_ms          simulation step dt_s = 10 ms (D38, kept in WP05 section 2)
-    max_on_ms        cut-off maximum continuous ON time T_max = 45 s (P11)
     settle_ms        settling time after T_end, T_set = 10 s (R09)
     command_delay_ms d_c host -> pump; 0 in Model 1 (Model 2 candidate: P15)
     report_delay_ms  d_r sensor -> host; 0 in Model 1 (Model 2 candidate: P15)
+
+    The cut-off maximum ON time is not an environment parameter: it is set per
+    run from the planned start volume and passed to start() (D45).
     """
 
     step_ms: int = 10
-    max_on_ms: int = 45_000
     settle_ms: int = 10_000
     command_delay_ms: int = 0
     report_delay_ms: int = 0
 
     def __post_init__(self):
-        for name in ("step_ms", "max_on_ms", "settle_ms",
-                     "command_delay_ms", "report_delay_ms"):
+        for name in ("step_ms", "settle_ms", "command_delay_ms", "report_delay_ms"):
             value = getattr(self, name)
             if not isinstance(value, int) or isinstance(value, bool) or value < 0:
                 raise ValueError(f"{name} must be a non-negative integer (ms)")
-        if self.step_ms <= 0 or self.max_on_ms <= 0:
-            raise ValueError("step_ms and max_on_ms must be positive")
+        if self.step_ms <= 0:
+            raise ValueError("step_ms must be positive")
         for name in ("command_delay_ms", "report_delay_ms", "settle_ms"):
             if getattr(self, name) % self.step_ms:
                 raise ValueError(f"{name} must be a whole multiple of step_ms (D39)")
@@ -55,6 +55,9 @@ class SimulationParameters:
 
 class SimulationEnvironment(Environment):
     """Environment that drives a simulated TankSystem.
+
+    start(scenario) reads scenario.v0_ml and scenario.t_max_ms (the per-run
+    cut-off, D45).
 
     tank_system must provide reset(v0_ml) (intake tube always empty, D40),
     step(dt_ms, intake_on, outtake_on) -> list of new boundary event names,
@@ -66,8 +69,8 @@ class SimulationEnvironment(Environment):
         self.parameters = parameters or SimulationParameters()
         p = self.parameters
         self._clock = SimulationClock(p.step_ms)
-        self._cutoff_in = CutOff(p.max_on_ms)
-        self._cutoff_out = CutOff(p.max_on_ms)
+        self._cutoff_in = None                     # created per run in start() (D45)
+        self._cutoff_out = None
         self._commands = DelayLine(p.command_delay_ms, (False, False))
         self._reports = DelayLine(p.report_delay_ms, False)
         self._started = False
@@ -79,10 +82,15 @@ class SimulationEnvironment(Environment):
 
     def start(self, scenario) -> None:
         v0_ml = scenario.v0_ml
+        t_max_ms = scenario.t_max_ms
+        if (not isinstance(t_max_ms, int) or isinstance(t_max_ms, bool) or t_max_ms <= 0
+                or t_max_ms % self._clock.step_ms):
+            raise ValueError("t_max_ms must be a positive whole multiple of step_ms (D45)")
         self.tank.reset(v0_ml)                      # rejects V0 outside [V_dead, C]
         self._clock.reset()
-        self._cutoff_in.reset()
-        self._cutoff_out.reset()
+        self._cutoff_in = CutOff(t_max_ms)          # per-run limit, same for both pumps
+        self._cutoff_out = CutOff(t_max_ms)
+        self.t_max_ms = t_max_ms
         self._commands.reset((False, False))        # both pumps OFF before the first call (D36)
         initial_sensor = self.tank.sensor_wet()
         self._reports.reset(initial_sensor)         # buffer filled with S(0) (WP05 4.7)
@@ -93,7 +101,8 @@ class SimulationEnvironment(Environment):
         self.truth_rows = []
         self.events = []
         self._started = True
-        self._log(0, "start", f"v0_ml={float(v0_ml)} sensor_wet={initial_sensor}")
+        self._log(0, "start", f"v0_ml={float(v0_ml)} sensor_wet={initial_sensor} "
+                              f"t_max_ms={t_max_ms}")
         self._record_truth(0)
 
     def now_ms(self) -> int:
