@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="580" viewBox="0 0 960 580"><rect width="960" height="580" rx="18" fill="#171b20"/>
+<text x="40" y="54" font-family="DejaVu Sans, sans-serif" font-size="32" fill="#edf2f6" font-weight="700" text-anchor="start">How the two models will be compared</text>
+<text x="40" y="85" font-family="DejaVu Sans, sans-serif" font-size="17" fill="#edf2f6" font-weight="400" text-anchor="start">Planned controller experiments   /   paired runs across three environments</text>
+<rect x="40" y="108" width="880" height="83" rx="10" fill="#252e38" stroke="#8494a4" stroke-width="2"/>
+<text x="62" y="140" font-family="DejaVu Sans, sans-serif" font-size="22" fill="#edf2f6" font-weight="700" text-anchor="start">One controller and one scenario per comparison</text>
+<text x="62" y="170" font-family="DejaVu Sans, sans-serif" font-size="18" fill="#edf2f6" font-weight="400" text-anchor="start">Match initial conditions and 0.1 s controller calls. Start each run with both pumps off.</text>
+<path d="M480 191V228 M178 228H782 M178 228V251 M480 228V251 M782 228V251" fill="none" stroke="#55a8ff" stroke-width="3" stroke-dasharray="none"/>
+<rect x="40" y="251" width="276" height="105" rx="10" fill="#252e38" stroke="#8494a4" stroke-width="2"/>
+<text x="178" y="284" font-family="DejaVu Sans, sans-serif" font-size="23" fill="#edf2f6" font-weight="700" text-anchor="middle">Physical rig</text>
+<text x="178" y="316" font-family="DejaVu Sans, sans-serif" font-size="17" fill="#edf2f6" font-weight="400" text-anchor="middle">ESP32 and tank</text>
+<text x="178" y="341" font-family="DejaVu Sans, sans-serif" font-size="16" fill="#edf2f6" font-weight="400" text-anchor="middle">Settled syringe readings</text>
+<rect x="342" y="251" width="276" height="105" rx="10" fill="#252e38" stroke="#8494a4" stroke-width="2"/>
+<text x="480" y="284" font-family="DejaVu Sans, sans-serif" font-size="23" fill="#edf2f6" font-weight="700" text-anchor="middle">Model 1</text>
+<text x="480" y="316" font-family="DejaVu Sans, sans-serif" font-size="17" fill="#edf2f6" font-weight="400" text-anchor="middle">Ideal pump and sensor</text>
+<text x="480" y="341" font-family="DejaVu Sans, sans-serif" font-size="16" fill="#edf2f6" font-weight="400" text-anchor="middle">Simulated volume trace</text>
+<rect x="644" y="251" width="276" height="105" rx="10" fill="#252e38" stroke="#8494a4" stroke-width="2"/>
+<text x="782" y="284" font-family="DejaVu Sans, sans-serif" font-size="23" fill="#edf2f6" font-weight="700" text-anchor="middle">Model 2</text>
+<text x="782" y="316" font-family="DejaVu Sans, sans-serif" font-size="17" fill="#edf2f6" font-weight="400" text-anchor="middle">Adds measurable rig effects</text>
+<text x="782" y="341" font-family="DejaVu Sans, sans-serif" font-size="16" fill="#edf2f6" font-weight="400" text-anchor="middle">Simulated volume trace</text>
+<path d="M178 356V381H782V356 M480 356V401" fill="none" stroke="#55a8ff" stroke-width="3" stroke-dasharray="none"/>
+<rect x="40" y="401" width="880" height="83" rx="10" fill="#252e38" stroke="#8494a4" stroke-width="2"/>
+<text x="62" y="435" font-family="DejaVu Sans, sans-serif" font-size="22" fill="#edf2f6" font-weight="700" text-anchor="start">Independent evaluator</text>
+<text x="62" y="462" font-family="DejaVu Sans, sans-serif" font-size="18" fill="#edf2f6" font-weight="400" text-anchor="start">Compare each model verdict with the rig verdict. Count missed failures and false alarms.</text>
+<text x="40" y="523" font-family="DejaVu Sans, sans-serif" font-size="18" fill="#edf2f6" font-weight="400" text-anchor="start">Tasks: timed fill  •  stop at the wet sensor  •  fill beyond the sensor to a target</text>
+<text x="40" y="552" font-family="DejaVu Sans, sans-serif" font-size="17" fill="#edf2f6" font-weight="400" text-anchor="start">Safety applies to every task. A cut-off trip fails FR08. Rig runs require approved safeguards.</text>
+</svg>
