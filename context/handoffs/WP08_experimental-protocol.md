@@ -1,0 +1,58 @@
+# Atomic handoff — WP08 (provisional)
+
+- **Agent / model version:** Claude Code, Claude Opus 5.5 (`claude-opus-5-5`). The 2026-11-25 unattended session's model is not recorded in this handoff.
+- **Status:** Approved by researcher 2026-11-26 as provisional; final version after WP04.
+- **Scope completed:**
+  - Clean-room controller prompt reviewed against D29, D35–D37 and D42 and kept unchanged. The prompt was written on 2026-11-25 in an unattended session, which stopped before the protocol.
+  - Experimental protocol written, covering:
+    - parameter rules R01–R16;
+    - mathematical verification;
+    - rig reset, run procedure, stop rules, session plans and cut-off check;
+    - per-run cut-off sizing;
+    - calibration vs held-out data;
+    - nominal and paired simulation runs;
+    - near-limit repeats;
+    - verdicts, model accuracy and the D25 comparison;
+    - generation procedure (AI family, session rules, pool G01–G10);
+    - reference selection;
+    - fault eligibility and selection;
+    - fallback injection list;
+    - data handling, safety summary and open items.
+- **Created or modified paths:**
+  - `experiments/experimental_protocol.md` (new)
+  - `experiments/prompts/controller_prompt_v1.md` (new, from 2026-11-25, unchanged today; SHA-256 `8e9ba48c739f67cf724dcf3a5811fd66816874b9bd148aef3687a9cdda449f7c`)
+  - `context/decisions.md` (D43–D47 appended; cross-reference notes on D10 and D14)
+  - `context/project_status.md` (WP08 row, next task, one change-log line)
+  - this handoff
+
+  Codex's uncommitted files were not touched.
+- **Checks performed and actual results:**
+  - Compared the prompt's rule list with `src/shared/controller_check.py`: modules, built-ins, mutable-container rule and interface match exactly.
+  - Confirmed the prompt contains no numbers, scenarios, check IDs, tolerances, fault types or model code.
+  - Recomputed the cut-off examples by hand with placeholders: 48.5 s from 5 mL and 23.5 s from 30 mL. The longest correct fill is 45.2 s in Model 2 with an empty tube. A never-stopping controller reaches 53.5 mL.
+  - Checked that T_end 60 s ≥ 48.5 + 5 s and that the R06 rule gives 30 s.
+  - The run ID scheme was taken from `src/shared/run_scenario.py`.
+  - No code was run or changed and no tests were needed. No controller was generated, no hardware was used, and nothing was committed.
+- **Decisions (all approved by researcher 2026-11-26):**
+  - D43: generation by OpenAI ChatGPT (researcher's choice; Gemini was proposed), so Codex must not build model, harness or evaluator code; prompt v1 frozen; pool G01–G10.
+  - D44: fault eligibility and selection based on code, before any run; fallback injection list.
+  - D45: per-run cut-off protecting capacity, not the safe mark.
+  - D46: reset and start conditions, controller given the WP04-measured values, paired runs at the measured V0, session plans.
+  - D47: near-limit repeats (extended to the ±ε_V bounds) and comparison rules.
+  - D10 resolved by D43 and D44 and approved.
+- **Assumptions / changes from previous artifacts:**
+  - D45 changes the approved single P11 cut-off value to a per-run value. After approval, code and oracles must follow (WP09a, WP10, WP12; M1-12, M2-8, M2-9).
+  - D47 extends the D27 near-limit rule beyond the safe mark.
+  - The reset method stays TBD until the rig check.
+  - The prompt's required-behaviour wording (WP06 K5–K7, X1, X2) is treated as task description under D29, not as acceptance rules.
+- **Blockers / outstanding questions:**
+  - Rig checklist and safe mark; sensor wiring; WP09a; WP04 (all final values).
+  - U30 for any outtake fault.
+- **Downstream dependencies:**
+  - WP09a: protocol sections 7.4 and 8 (set-limit command, ceiling, cut-off check).
+  - WP09b and WP14: sections 13–15.
+  - WP12 follow-up: sections 8 and 10 (per-run T_max, paired V0, `purpose` in `run.json`, `manual.csv` template).
+  - WP13 and WP15: sections 9 and 11–12.
+  - WP04: sections 3, 6 and 9.
+- **Prompt/log reference:** the unattended session transcript of 2026-11-25 (prompt written at 21:34 local) and this session of 2026-11-26. No commit.
+- **Next suggested atomic task (do not execute):** the researcher runs the ChatGPT generation sessions G01–G10 outside the repository. In parallel, in a fresh session: the WP10/WP12 follow-up for D45/D46.
